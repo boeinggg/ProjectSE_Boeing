@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "./arttoy_detail.css";
 import Button from "./button";
 import Dropzone from "./dropzone";
+import { CreateArtToy } from "../../../services/https/seller/arttoy";
+import { ArtToysInterface } from "../../../interfaces/ArtToy";
 
 const ArtToyDetail: React.FC = () => {
     const [formValues, setFormValues] = useState({
@@ -46,11 +48,23 @@ const ArtToyDetail: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
+        console.log(formValues);
+        const values: ArtToysInterface = {};
+        values.name = formValues.name;
+        values.brand = formValues.brand;
+        values.description = formValues.description;
+        values.material = formValues.material;
+        values.size = formValues.size;
+        values.categoryID = Number(formValues.category);
+        values.sellerID = 1;
+
         if (validateForm()) {
             alert("Form submitted successfully!");
             console.log("Form Data:", formValues);
             console.log("Uploaded Files:", uploadedFiles);
+            const res = await CreateArtToy(values);
+            console.log(res);
         } else {
             alert("Please fill in all required fields.");
         }
@@ -112,9 +126,9 @@ const ArtToyDetail: React.FC = () => {
                                     id="category"
                                     options={[
                                         { value: "", label: "Choose category" },
-                                        { value: "BlindBox", label: "Blind Box" },
-                                        { value: "Figurine", label: "Figurine" },
-                                        { value: "MEGA100%", label: "MEGA 100%" },
+                                        { value: "1", label: "Blind Box" },
+                                        { value: "2", label: "Figurine" },
+                                        { value: "3", label: "MEGA 100%" },
                                     ]}
                                     value={formValues.category}
                                     onChange={handleInputChange}

@@ -76,4 +76,14 @@ async function CreateArtToy(data: ArtToysInterface) {
         .catch((e) => e.response);
 }
 
-export { GetCategory, GetArtToy, GetArtToyById, UpdateArtToysById, DeleteArtToysById, CreateArtToy };
+async function GetArtToyID() {
+    return await axios
+
+        .get(`${apiUrl}/arttoys/latest`, requestOptions)
+
+        .then((res) => res)
+
+        .catch((e) => e.response);
+}
+
+export { GetCategory, GetArtToy, GetArtToyById, UpdateArtToysById, DeleteArtToysById, CreateArtToy, GetArtToyID };

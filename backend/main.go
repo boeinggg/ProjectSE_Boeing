@@ -37,6 +37,7 @@ func main() {
 		router.POST("/arttoys", controller.CreateArtToy)
 		router.PUT("/arttoys/:id", controller.UpdateArtToy)
 		router.DELETE("/arttoys/:id", controller.DeleteArtToy)
+		router.GET("/arttoys/latest", controller.GetLatestArtToyID)
 		// router.GET("/members/count", controller.CountMembers)
 		// router.POST("/members/:id/subscribe", controller.CheckSubscription)
 
