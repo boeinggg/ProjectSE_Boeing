@@ -1,0 +1,149 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    list-style: none;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+.detail {
+    display: flex;
+    padding: 16px;
+    flex-direction: column;
+    width: 100%;
+}
+
+.detail h1 {
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.arttoy {
+    padding: 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0px 5px 10px 0px rgba(217, 217, 217, 0.5);
+    width: 90%;
+    height: max-content;
+    margin-bottom: 3rem;
+}
+
+.arttoy-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.detail h2 {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.detail h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.des {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.des .row {
+    display: flex;
+    gap: 16px;
+}
+
+.des .field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.des label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.des input,
+.des select,
+.arttoy textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-sizing: border-box;
+    color: #000;
+}
+
+.des input:focus,
+.des select:focus,
+.arttoy textarea:focus {
+    border-color: #666;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.arttoy textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.detail-arttoy-form {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.detail-left-form {
+    width: 100%;
+}
+
+.detail-left-form h4 {
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.field.has-error label {
+    color: #d32f2f; /* Error label color (red) */
+    font-size: 12px;
+}
+
+.field.has-error input,
+.field.has-error textarea,
+.field.has-error select {
+    border-color: #d32f2f; /* Error input border color */
+    background-color: #ffeeee; /* Optional light red background for input fields */
+}
+
+.error-message {
+    color: #d32f2f; /* Error message color */
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+    display: block;
+}

@@ -1,0 +1,97 @@
+/* Dropzone container styling */
+.dropzone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 54px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+.dropzone:hover {
+    background-color: #f1f1f1;
+}
+
+.dropzone--active {
+    border-color: #4caf50;
+    background-color: #eaffea;
+}
+
+/* Content inside the dropzone */
+.dropzone__content {
+    text-align: center;
+    color: #333;
+}
+
+.dropzone__content span {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #4caf50;
+}
+
+.dropzone__content p {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Uploaded files container */
+.uploaded-files {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+/* Individual file styling */
+.uploaded-file {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    max-width: 100px;
+    text-align: center;
+}
+
+/* Image preview styling */
+.uploaded-file-preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.uploaded-file-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove file button (red cross) */
+.remove-file-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.2s ease;
+}
+
+.remove-file-icon:hover {
+    background-color: darkred;
+}
