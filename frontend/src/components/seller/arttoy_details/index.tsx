@@ -20,14 +20,14 @@ const ArtToyDetail: React.FC = () => {
         status: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [uploadedFiles, setUploadedFiles] = useState<string[]>([]); // Store Base64 strings here
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const MAX_FILES = 10;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
         setFormValues((prev) => ({ ...prev, [id]: value }));
-        setErrors((prev) => ({ ...prev, [id]: "" })); // Clear error for the field being updated
+        setErrors((prev) => ({ ...prev, [id]: "" }));
     };
 
     const validateForm = () => {
@@ -49,15 +49,15 @@ const ArtToyDetail: React.FC = () => {
     };
 
     const handleConfirm = async () => {
-        console.log(formValues);
-        const values: ArtToysInterface = {};
-        values.name = formValues.name;
-        values.brand = formValues.brand;
-        values.description = formValues.description;
-        values.material = formValues.material;
-        values.size = formValues.size;
-        values.categoryID = Number(formValues.category);
-        values.sellerID = 1;
+        const values: ArtToysInterface = {
+            name: formValues.name,
+            brand: formValues.brand,
+            description: formValues.description,
+            material: formValues.material,
+            size: formValues.size,
+            categoryID: Number(formValues.category),
+            sellerID: 1,
+        };
 
         if (validateForm()) {
             alert("Form submitted successfully!");
@@ -70,8 +70,8 @@ const ArtToyDetail: React.FC = () => {
         }
     };
 
-    const handleDrop = (files: File[]) => {
-        const newFiles = [...uploadedFiles, ...files];
+    const handleDrop = (base64Files: string[]) => {
+        const newFiles = [...uploadedFiles, ...base64Files];
         if (newFiles.length > MAX_FILES) {
             alert(`You can upload a maximum of ${MAX_FILES} images.`);
             return;
@@ -169,9 +169,9 @@ const ArtToyDetail: React.FC = () => {
                             {isDropzoneVisible && <Dropzone onDrop={handleDrop} maxFiles={MAX_FILES - uploadedFiles.length} />}
                             {uploadedFiles.length > 0 && (
                                 <div className="uploaded-files">
-                                    {uploadedFiles.map((file, index) => (
+                                    {uploadedFiles.map((base64Image, index) => (
                                         <div key={index} className="uploaded-file">
-                                            <img src={URL.createObjectURL(file)} alt={file.name} className="uploaded-file-preview" />
+                                            <img src={base64Image} alt={`Uploaded ${index}`} className="uploaded-file-preview" />
                                             <button className="remove-file-icon" onClick={() => handleRemoveFile(index)}>
                                                 &times;
                                             </button>
