@@ -10,7 +10,7 @@ import (
 type AuctionDetail struct {
         gorm.Model
         StartPrice    float64 `valid:"required~Start Price is required, float~Start Price must be a number, customMin~Start Price must be greater than 0"`
-        Bid           int      `valid:"required~Bid is required, customBidMin~Bid must be a non-negative integer"`
+        BidIncrement  int      `valid:"required~Bid is required, customBidMin~Bid must be a non-negative integer"`
         CurrentPrice  float64 `valid:"required~Current Price is required, float~Current Price must be a number, customMin~Current Price must be greater than 0"`
         EndPrice      float64 `valid:"float~End Price must be a number"`
         StartDateTime time.Time `valid:"required~Start Date and Time is required"`

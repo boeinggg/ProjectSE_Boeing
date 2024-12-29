@@ -18,7 +18,7 @@ func TestStartPrice(t *testing.T) {
         t.Run("start_price is required", func(t *testing.T) {
                 auction := entity.AuctionDetail{
                         StartPrice:    0.0, // Invalid: StartPrice must be greater than 0
-                        Bid:           0,
+                        BidIncrement:  0,
                         CurrentPrice: 100.0,
                         StartDateTime: time.Now(),
                         EndDateTime:   time.Now().Add(24 * time.Hour),
@@ -61,7 +61,7 @@ func TestAuction_Valid(t *testing.T) {
 		// Mock AuctionDetail with valid data
 		auction := entity.AuctionDetail{
 			StartPrice:    100.0,
-			Bid:           10,
+			BidIncrement:  10,
 			CurrentPrice:  100.0,
 			StartDateTime: time.Now(),
 			EndDateTime:   time.Now().Add(24 * time.Hour),

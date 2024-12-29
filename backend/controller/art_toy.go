@@ -151,19 +151,19 @@ func GetLatestArtToyID(c *gin.Context) {
     var latestArtToy entity.ArtToy
 
     db := config.DB()
-    
+
     // Fetch the most recent ArtToy based on the ID
     if err := db.Order("id desc").First(&latestArtToy).Error; err != nil {
         if err == gorm.ErrRecordNotFound {
             c.JSON(http.StatusNotFound, gin.H{"error": "No ArtToy found"})
         } else {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error", "details": err.Error()})
         }
         return
     }
 
     // Return the latest ArtToyID
     c.JSON(http.StatusOK, gin.H{
-        "latest_arttoy_id": latestArtToy.ID,
+        "id": latestArtToy.ID, // Use "id" to keep the response clean
     })
 }

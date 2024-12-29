@@ -6,6 +6,7 @@ import { CreateArtToy, GetArtToyID } from "../../../services/https/seller/arttoy
 import { CreateAuction } from "../../../services/https/seller/auction";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
 import { AuctionInterface } from "../../../interfaces/Auction";
+import { Toaster, toast } from "react-hot-toast";
 
 const ArtToyDetail: React.FC = () => {
     const [formValues, setFormValues] = useState({
@@ -26,9 +27,18 @@ const ArtToyDetail: React.FC = () => {
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const MAX_FILES = 10;
 
+    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    //     const { id, value } = e.target;
+    //     setFormValues((prev) => ({ ...prev, [id]: value }));
+    //     setErrors((prev) => ({ ...prev, [id]: "" }));
+    // };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
-        setFormValues((prev) => ({ ...prev, [id]: value }));
+        setFormValues((prev) => ({
+            ...prev,
+            [id]: id === "startDate" || id === "endDate" ? new Date(value) : value,
+        }));
         setErrors((prev) => ({ ...prev, [id]: "" }));
     };
 
@@ -62,26 +72,49 @@ const ArtToyDetail: React.FC = () => {
         };
 
         if (validateForm()) {
-            alert("Form submitted successfully!");
-            console.log("Form Data:", formValues);
-            console.log("Uploaded Files:", uploadedFiles);
-            const res = await CreateArtToy(values);
-            const arttoyID = await GetArtToyID();
-            const auctionDetails: AuctionInterface = {
-                startPrice: Number(formValues.startPrice),
-                bidIncrement: Number(formValues.bidIncrement),
-                CurrentPrice: Number(formValues.startPrice),
-                EndPrice: Number(formValues.startPrice),
-                startDate: formValues.startDate,
-                endDate: formValues.endDate,
-                status: formValues.status,
-                ArtToyID: arttoyID,
-            };
-            const res2 = await CreateAuction(auctionDetails);
-            console.log(res);
-            console.log(res2);
+            try {
+                const res = await CreateArtToy(values);
+                const arttoyID = await GetArtToyID();
+                console.log(arttoyID);
+                const auctionDetails: AuctionInterface = {
+                    startPrice: Number(formValues.startPrice),
+                    bidIncrement: Number(formValues.bidIncrement),
+                    CurrentPrice: Number(formValues.startPrice),
+                    EndPrice: Number(formValues.startPrice),
+                    startDate: formValues.startDate,
+                    endDate: formValues.endDate,
+                    status: formValues.status,
+                    ArtToyID: arttoyID,
+                };
+                const res2 = await CreateAuction(auctionDetails);
+                console.log(res);
+                console.log(res2);
+
+                // Show success toast
+                toast.success("Data saved successfully!");
+
+                // Reset form values and uploaded files
+                setFormValues({
+                    name: "",
+                    brand: "",
+                    category: "",
+                    size: "",
+                    material: "",
+                    description: "",
+                    startPrice: "",
+                    bidIncrement: "",
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    status: "",
+                });
+                setUploadedFiles([]);
+                setIsDropzoneVisible(true); // Reset Dropzone visibility
+            } catch (error) {
+                console.error("Error saving data:", error);
+                toast.error("An error occurred while saving the data.");
+            }
         } else {
-            alert("Please fill in all required fields.");
+            toast.error("Please fill in all required fields.");
         }
     };
 
@@ -105,6 +138,7 @@ const ArtToyDetail: React.FC = () => {
 
     return (
         <div className="detail">
+            <Toaster />
             <div className="detail-header">
                 <h1>Add Your Art Toy</h1>
                 <div>
@@ -223,15 +257,17 @@ const ArtToyDetail: React.FC = () => {
                                 label="Start Date"
                                 id="startDate"
                                 type="datetime-local"
-                                value={formValues.startDate.toString()}
+                                value={formValues.startDate.toISOString().slice(0, 16)} // Correctly formatted value
+
                                 onChange={handleInputChange}
                                 error={errors.startDate}
                             />
+
                             <Field
                                 label="End Date"
                                 id="endDate"
                                 type="datetime-local"
-                                value={formValues.endDate.toString()}
+                                value={formValues.endDate.toISOString().slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
                                 onChange={handleInputChange}
                                 error={errors.endDate}
                             />

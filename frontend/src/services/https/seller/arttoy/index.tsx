@@ -77,13 +77,22 @@ async function CreateArtToy(data: ArtToysInterface) {
 }
 
 async function GetArtToyID() {
-    return await axios
-
-        .get(`${apiUrl}/arttoys/latest`, requestOptions)
-
-        .then((res) => res)
-
-        .catch((e) => e.response);
+    try {
+        const response = await axios.get(`${apiUrl}/arttoys/latest`, requestOptions);
+        if (response.status === 200) {
+            return response.data.id; // Extract and return the ArtToy ID
+        } else {
+            throw new Error("Failed to fetch the latest ArtToy ID");
+        }
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error fetching latest ArtToy ID:", error.response?.data);
+            throw new Error(error.response?.data?.error || "Unexpected error occurred");
+        } else {
+            console.error("Unknown error fetching latest ArtToy ID:", error);
+            throw new Error("An unexpected error occurred");
+        }
+    }
 }
 
 export { GetCategory, GetArtToy, GetArtToyById, UpdateArtToysById, DeleteArtToysById, CreateArtToy, GetArtToyID };
