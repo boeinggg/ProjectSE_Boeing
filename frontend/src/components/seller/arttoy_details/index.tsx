@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import "./arttoy_detail.css";
 import Button from "./button";
 import Dropzone from "./dropzone";
-import { CreateArtToy } from "../../../services/https/seller/arttoy";
+import { CreateArtToy, GetArtToyID } from "../../../services/https/seller/arttoy";
+import { CreateAuction } from "../../../services/https/seller/auction";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
+import { AuctionInterface } from "../../../interfaces/Auction";
 
 const ArtToyDetail: React.FC = () => {
     const [formValues, setFormValues] = useState({
@@ -15,8 +17,8 @@ const ArtToyDetail: React.FC = () => {
         description: "",
         startPrice: "",
         bidIncrement: "",
-        startDate: "",
-        endDate: "",
+        startDate: new Date(),
+        endDate: new Date(),
         status: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,7 +66,20 @@ const ArtToyDetail: React.FC = () => {
             console.log("Form Data:", formValues);
             console.log("Uploaded Files:", uploadedFiles);
             const res = await CreateArtToy(values);
+            const arttoyID = await GetArtToyID();
+            const auctionDetails: AuctionInterface = {
+                startPrice: Number(formValues.startPrice),
+                bidIncrement: Number(formValues.bidIncrement),
+                CurrentPrice: Number(formValues.startPrice),
+                EndPrice: Number(formValues.startPrice),
+                startDate: formValues.startDate,
+                endDate: formValues.endDate,
+                status: formValues.status,
+                ArtToyID: arttoyID,
+            };
+            const res2 = await CreateAuction(auctionDetails);
             console.log(res);
+            console.log(res2);
         } else {
             alert("Please fill in all required fields.");
         }
@@ -208,7 +223,7 @@ const ArtToyDetail: React.FC = () => {
                                 label="Start Date"
                                 id="startDate"
                                 type="datetime-local"
-                                value={formValues.startDate}
+                                value={formValues.startDate.toString()}
                                 onChange={handleInputChange}
                                 error={errors.startDate}
                             />
@@ -216,7 +231,7 @@ const ArtToyDetail: React.FC = () => {
                                 label="End Date"
                                 id="endDate"
                                 type="datetime-local"
-                                value={formValues.endDate}
+                                value={formValues.endDate.toString()}
                                 onChange={handleInputChange}
                                 error={errors.endDate}
                             />
