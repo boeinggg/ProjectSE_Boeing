@@ -9,24 +9,63 @@
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
 }
-.custom-navbar {
+.custom-navbar-list-toy {
     background-color: white; /* เปลี่ยนพื้นหลังเป็นสีฟ้าตัวอย่าง */
     color: white; /* กำหนดสีข้อความ */
     display: flex; /* จัดการ layout */
     height: 8vh; /* ตั้งความสูง */
     width: 100vw;
     position: sticky;
-    justify-content: right;
+    justify-content: space-between;
     align-items: center;
     padding: 0 1rem;
     box-shadow: 0px 5px 10px 0px rgba(217, 217, 217, 0.5);
+    border: 1px solid #403e3e;
 }
-.custom-navbar svg {
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-items: left;
+    color: #d9d9d9;
+    padding: 12px;
+}
+.logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+.logo-icon img {
+    height: 38px; /* ขนาดของไอคอน */
+    width: 38px;
+    border-radius: 18%;
+    border: 1px solid white;
+}
+
+.search-bar {
+    width: 500px; /* ใช้ flex เพื่อให้ส่วนนี้ยืดหยุ่นได้ */
+    margin: 0 10px;
+    display: flex;
+}
+.search-bar input {
+    color: #000;
+}
+.ant-input-prefix svg {
+    color: #848282d2;
+}
+
+
+.dropdown svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 24px; /* ขนา��ของไอคอน */
     width: 24px; /* ขนา��ของไอคอน */
     color: #000;
 }
-.custom-navbar svg :hover {
+
+.dropdown svg :hover {
     height: 24px; /* ขนา��ของไอคอน */
     width: 24px; /* ขนา��ของไอคอน */
     color: green;

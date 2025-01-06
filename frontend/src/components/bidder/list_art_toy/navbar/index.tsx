@@ -1,11 +1,12 @@
-import React from "react";
-import {Dropdown, Space } from "antd";
+import React, { useState } from "react";
+import { Dropdown, Space, Input } from "antd";
 import type { MenuProps } from "antd";
 import { CiUser } from "react-icons/ci";
 import { FaCircleUser } from "react-icons/fa6";
 import { IoIosLogOut } from "react-icons/io";
-import "./navbar.css"; // เพิ่มไฟล์ CSS
-
+import "./listToy_navbar.css"; // เพิ่มไฟล์ CSS
+import icon from "../../../../assets/logo.gif";
+import { SearchOutlined } from "@ant-design/icons";
 
 const items: MenuProps["items"] = [
     {
@@ -29,15 +30,30 @@ const items: MenuProps["items"] = [
 ];
 
 const Navbar: React.FC = () => {
+    const [searchText, setSearchText] = useState("");
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchText(e.target.value);
+    };
     return (
-        <div className="custom-navbar">
-            <Dropdown menu={{ items }}>
-                <a onClick={(e) => e.preventDefault()}>
-                    <Space>
-                        <FaCircleUser />
-                    </Space>
-                </a>
-            </Dropdown>
+        <div className="custom-navbar-list-toy">
+            <div className="logo">
+                <div className="logo-icon">
+                    <img src={icon} alt="Logo" />
+                </div>
+            </div>
+            <div className="search-bar">
+                <Input placeholder="Search" prefix={<SearchOutlined />} value={searchText} onChange={handleSearchChange} />
+            </div>
+            <div className="dropdown">
+                <Dropdown menu={{ items }}>
+                    <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                            <FaCircleUser />
+                        </Space>
+                    </a>
+                </Dropdown>
+            </div>
         </div>
     );
 };

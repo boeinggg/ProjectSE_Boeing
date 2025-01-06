@@ -17,10 +17,7 @@
     overflow: hidden;
 }
 
-.listing {
+.list {
     display: flex;
-    padding: 24px 40px;
-    background-color: #f9fafc;
-    height: 92vh;
     overflow: auto;
 }
