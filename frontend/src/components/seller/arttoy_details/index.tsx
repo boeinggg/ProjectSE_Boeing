@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./arttoy_detail.css";
 import Button from "./button";
 import Dropzone from "./dropzone";
-import { CreateArtToy, GetArtToyID } from "../../../services/https/seller/arttoy";
+import { CreateArtToy, GetArtToyID, GetCategory } from "../../../services/https/seller/arttoy";
 import { CreateAuction } from "../../../services/https/seller/auction";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
 import { AuctionInterface } from "../../../interfaces/Auction";
 import { Toaster, toast } from "react-hot-toast";
+import { CategoryInterface } from "../../../interfaces/Category";
 
 const ArtToyDetail: React.FC = () => {
     const [formValues, setFormValues] = useState({
@@ -18,29 +19,40 @@ const ArtToyDetail: React.FC = () => {
         description: "",
         startPrice: "",
         bidIncrement: "",
-        startDate: new Date(),
-        endDate: new Date(),
+        startDateTime: new Date(),
+        endDateTime: new Date(),
         status: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [uploadedFiles, setUploadedFiles] = useState<string[]>([]); // Store Base64 strings here
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const MAX_FILES = 10;
-
-    // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    //     const { id, value } = e.target;
-    //     setFormValues((prev) => ({ ...prev, [id]: value }));
-    //     setErrors((prev) => ({ ...prev, [id]: "" }));
-    // };
+    const [categories, setCategories] = useState<CategoryInterface[]>([]); 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
+
         setFormValues((prev) => ({
             ...prev,
-            [id]: id === "startDate" || id === "endDate" ? new Date(value) : value,
+            [id]: id === "startDateTime" || id === "endDateTime" ? new Date(value) : value,
         }));
         setErrors((prev) => ({ ...prev, [id]: "" }));
     };
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await GetCategory();
+                const data: CategoryInterface[] = await response.data; // Type the response data
+                setCategories(data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                // Handle error gracefully (e.g., display an error message to the user)
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -52,8 +64,8 @@ const ArtToyDetail: React.FC = () => {
         if (!formValues.description.trim()) newErrors.description = "Description is required.";
         if (!formValues.startPrice.trim()) newErrors.startPrice = "Start Price is required.";
         if (!formValues.bidIncrement.trim()) newErrors.bidIncrement = "Bid Increment is required.";
-        if (!formValues.startDate) newErrors.startDate = "Start Date is required.";
-        if (!formValues.endDate) newErrors.endDate = "End Date is required.";
+        if (!formValues.startDateTime) newErrors.startDate = "Start Date is required.";
+        if (!formValues.endDateTime) newErrors.endDate = "End Date is required.";
         if (!formValues.status) newErrors.status = "Status is required.";
 
         setErrors(newErrors);
@@ -69,6 +81,7 @@ const ArtToyDetail: React.FC = () => {
             size: formValues.size,
             categoryID: Number(formValues.category),
             sellerID: 1,
+            picture: uploadedFiles.join(","),
         };
 
         if (validateForm()) {
@@ -81,8 +94,8 @@ const ArtToyDetail: React.FC = () => {
                     bidIncrement: Number(formValues.bidIncrement),
                     CurrentPrice: Number(formValues.startPrice),
                     EndPrice: Number(formValues.startPrice),
-                    startDate: formValues.startDate,
-                    endDate: formValues.endDate,
+                    startDateTime: new Date(formValues.startDateTime.getTime() + 7 * 60 * 60 * 1000), // เพิ่ม 7 ชั่วโมง
+                    endDateTime: new Date(formValues.endDateTime.getTime() + 7 * 60 * 60 * 1000),
                     status: formValues.status,
                     ArtToyID: arttoyID,
                 };
@@ -103,8 +116,8 @@ const ArtToyDetail: React.FC = () => {
                     description: "",
                     startPrice: "",
                     bidIncrement: "",
-                    startDate: new Date(),
-                    endDate: new Date(),
+                    startDateTime: new Date(),
+                    endDateTime: new Date(),
                     status: "",
                 });
                 setUploadedFiles([]);
@@ -173,12 +186,10 @@ const ArtToyDetail: React.FC = () => {
                                 <SelectField
                                     label="Category"
                                     id="category"
-                                    options={[
-                                        { value: "", label: "Choose category" },
-                                        { value: "1", label: "Blind Box" },
-                                        { value: "2", label: "Figurine" },
-                                        { value: "3", label: "MEGA 100%" },
-                                    ]}
+                                    options={categories.map((category) => ({
+                                        value: category.ID?.toString() || "", // Handle potential missing ID
+                                        label: category.Name || "", // Handle potential missing Name
+                                    }))}
                                     value={formValues.category}
                                     onChange={handleInputChange}
                                     error={errors.category}
@@ -254,20 +265,26 @@ const ArtToyDetail: React.FC = () => {
                         </div>
                         <div className="row">
                             <Field
-                                label="Start Date"
-                                id="startDate"
+                                label="Start Date Time"
+                                id="startDateTime"
                                 type="datetime-local"
-                                value={formValues.startDate.toISOString().slice(0, 16)} // Correctly formatted value
-
+                                value={new Date(
+                                    formValues.startDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
+                                )
+                                    .toISOString()
+                                    .slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
                                 onChange={handleInputChange}
                                 error={errors.startDate}
                             />
-
                             <Field
-                                label="End Date"
-                                id="endDate"
+                                label="End Date Time"
+                                id="endDateTime"
                                 type="datetime-local"
-                                value={formValues.endDate.toISOString().slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
+                                value={new Date(
+                                    formValues.endDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
+                                )
+                                    .toISOString()
+                                    .slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
                                 onChange={handleInputChange}
                                 error={errors.endDate}
                             />

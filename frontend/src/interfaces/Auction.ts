@@ -11,9 +11,9 @@ export interface AuctionInterface {
 
     EndPrice?: number;
 
-    startDate?: Date;
+    startDateTime?: Date;
 
-    endDate?: Date;
+    endDateTime?: Date;
 
     status?: string;
 

@@ -1,10 +1,10 @@
 package config
 
-
 import (
 	"fmt"
 	// "time"
 	"backend/entity"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -55,13 +55,11 @@ func SetupDatabase() {
 	)
 
 
-	Category1 := entity.Category{Name: "Choose a category"}
 	Category2 := entity.Category{Name: "Blind Box"}
 	Category3 := entity.Category{Name: "Figure"}
 	Category4 := entity.Category{Name: "MEGA 100%"}
 
 
-	db.FirstOrCreate(&Category1, &entity.Category{Name: "Choose a category"})
 	db.FirstOrCreate(&Category2, &entity.Category{Name: "Blind Box"})
 	db.FirstOrCreate(&Category3, &entity.Category{Name: "Figure"})
 	db.FirstOrCreate(&Category4, &entity.Category{Name: "MEGA 100%"})

@@ -40,7 +40,87 @@ func TestStartPrice(t *testing.T) {
                 g.Expect(err).NotTo(BeNil())
                 g.Expect(err.Error()).To(ContainSubstring("Start Price is required"))
         })
+
+		t.Run("Start Price must be a number", func(t *testing.T) {
+			auction := entity.AuctionDetail{
+					StartPrice:    0.0, // Invalid: StartPrice must be greater than 0
+					BidIncrement:  0,
+					CurrentPrice: 100.0,
+					StartDateTime: time.Now(),
+					EndDateTime:   time.Now().Add(24 * time.Hour),
+					Status:        "open",
+					ArtToyID:      1,
+			}
+
+			// Validate the struct
+			ok, err := govalidator.ValidateStruct(auction)
+
+			// Debug prints to show the result of validation
+			fmt.Printf("Validation OK: %v\n", ok)
+			if err != nil {
+					fmt.Printf("Validation Error: %v\n", err)
+			}
+
+			// Validation should fail
+			g.Expect(ok).NotTo(BeTrue())
+			g.Expect(err).NotTo(BeNil())
+			g.Expect(err.Error()).To(ContainSubstring("Start Price must be a number"))
+	})
+
+		t.Run("Bid is required", func(t *testing.T) {
+			auction := entity.AuctionDetail{
+					StartPrice:    100.0, 
+					BidIncrement:  0,
+					CurrentPrice: 100.0,
+					StartDateTime: time.Now(),
+					EndDateTime:   time.Now().Add(24 * time.Hour),
+					Status:        "open",
+					ArtToyID:      1,
+			}
+
+			// Validate the struct
+			ok, err := govalidator.ValidateStruct(auction)
+
+			// Debug prints to show the result of validation
+			fmt.Printf("Validation OK: %v\n", ok)
+			if err != nil {
+					fmt.Printf("Validation Error: %v\n", err)
+			}
+
+			// Validation should fail
+			g.Expect(ok).NotTo(BeTrue())
+			g.Expect(err).NotTo(BeNil())
+			g.Expect(err.Error()).To(ContainSubstring("Bid is required"))
+	})
+
+		t.Run("Bid must be a non-negative integer", func(t *testing.T) {
+			auction := entity.AuctionDetail{
+					StartPrice:    100.0, 
+					BidIncrement:  -5,
+					CurrentPrice: 100.0,
+					StartDateTime: time.Now(),
+					EndDateTime:   time.Now().Add(24 * time.Hour),
+					Status:        "open",
+					ArtToyID:      1,
+			}
+
+			// Validate the struct
+			ok, err := govalidator.ValidateStruct(auction)
+
+			// Debug prints to show the result of validation
+			fmt.Printf("Validation OK: %v\n", ok)
+			if err != nil {
+					fmt.Printf("Validation Error: %v\n", err)
+			}
+
+			// Validation should fail
+			g.Expect(ok).NotTo(BeTrue())
+			g.Expect(err).NotTo(BeNil())
+			g.Expect(err.Error()).To(ContainSubstring("Bid must be a non-negative integer"))
+	})
 }
+
+
 
 func TestAuction_Valid(t *testing.T) {
 	g := NewGomegaWithT(t)

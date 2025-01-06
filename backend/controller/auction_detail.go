@@ -3,7 +3,7 @@ package controller
 import (
 	"log"
 	"net/http"
-	"time"
+	// "time"
 
 	"backend/config"
 	"backend/entity"
@@ -43,15 +43,15 @@ func CreateAuctionDetail(c *gin.Context) {
 	// }
 
     // Create AuctionDetail	
-	startDateTime, _ := time.Parse("2006-01-02 15:04:05", "2024-12-29 16:00:00")
-	endDateTime , _ := time.Parse("2006-01-02 15:04:05", "2024-12-29 16:00:00")	
+	// startDateTime, _ := time.Parse("2006-01-02 15:04:05", "2024-12-29 16:00:00")
+	// endDateTime , _ := time.Parse("2006-01-02 15:04:05", "2024-12-29 16:00:00")	
     at := entity.AuctionDetail{
 		StartPrice: auction.StartPrice,
 		BidIncrement: auction.BidIncrement,
 		CurrentPrice: auction.CurrentPrice,
 		EndPrice: auction.EndPrice,
-		StartDateTime: startDateTime,
-		EndDateTime: endDateTime,
+		StartDateTime: auction.StartDateTime,
+		EndDateTime: auction.EndDateTime,
 		Status: auction.Status,
 		ArtToyID: arttoy.ID,
 		ArtToy: arttoy,
