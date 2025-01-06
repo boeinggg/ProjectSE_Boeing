@@ -27,7 +27,7 @@ const ArtToyDetail: React.FC = () => {
     const [uploadedFiles, setUploadedFiles] = useState<string[]>([]); // Store Base64 strings here
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const MAX_FILES = 10;
-    const [categories, setCategories] = useState<CategoryInterface[]>([]); 
+    const [categories, setCategories] = useState<CategoryInterface[]>([]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { id, value } = e.target;
@@ -53,6 +53,21 @@ const ArtToyDetail: React.FC = () => {
 
         fetchCategories();
     }, []);
+
+    useEffect(() => {
+        const updateStatus = () => {
+            const now = new Date();
+            if (formValues.startDateTime > now) {
+                setFormValues((prev) => ({ ...prev, status: "upcoming" }));
+            } else if (formValues.startDateTime <= now && formValues.endDateTime > now) {
+                setFormValues((prev) => ({ ...prev, status: "active" }));
+            } else if (formValues.endDateTime <= now) {
+                setFormValues((prev) => ({ ...prev, status: "close" }));
+            }
+        };
+
+        updateStatus();
+    }, [formValues.startDateTime, formValues.endDateTime]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -186,14 +201,18 @@ const ArtToyDetail: React.FC = () => {
                                 <SelectField
                                     label="Category"
                                     id="category"
-                                    options={categories.map((category) => ({
-                                        value: category.ID?.toString() || "", // Handle potential missing ID
-                                        label: category.Name || "", // Handle potential missing Name
-                                    }))}
+                                    options={[
+                                        { value: "", label: "Select Category" }, // ตัวเลือกเริ่มต้น
+                                        ...categories.map((category) => ({
+                                            value: category.ID?.toString() || "", // Handle potential missing ID
+                                            label: category.Name || "", // Handle potential missing Name
+                                        })),
+                                    ]}
                                     value={formValues.category}
                                     onChange={handleInputChange}
                                     error={errors.category}
                                 />
+
                                 <Field
                                     label="Size"
                                     id="size"
@@ -289,7 +308,7 @@ const ArtToyDetail: React.FC = () => {
                                 error={errors.endDate}
                             />
                         </div>
-                        <SelectField
+                        {/* <SelectField
                             label="Status"
                             id="status"
                             options={[
@@ -301,7 +320,7 @@ const ArtToyDetail: React.FC = () => {
                             value={formValues.status}
                             onChange={handleInputChange}
                             error={errors.status}
-                        />
+                        /> */}
                     </div>
                 </div>
             </div>
