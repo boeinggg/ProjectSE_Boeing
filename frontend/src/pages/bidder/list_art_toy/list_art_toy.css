@@ -13,11 +13,93 @@
     display: flex;
     width: 100%;
     height: 100%;
-    background-color: #f9fafc;
+    background-color: #f9f9f9;
     overflow: hidden;
 }
 
-.list {
+
+.tab_category {
     display: flex;
     overflow: auto;
+    justify-content: center;
+    background-color: white;
+    height: 8vh;
+    border-bottom: 1px solid #d3cccc;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+}
+
+.tab {
+    padding: 10px 30px;
+    font-size: 16px;
+    font-weight: 400;
+    cursor: pointer;
+    background-color: transparent;
+    color: #736767;
+}
+
+.tab:hover,
+.tab.active {
+    color: black;
+    font-weight: 600;
+}
+.banner {
+    width: 100%;
+    height: 50vh;
+    overflow: auto;
+}
+
+.status {
+    display: flex; /* ใช้ flexbox เพื่อจัดเรียงเป็นแนวนอน */
+    justify-content: center; /* จัดกลาง */
+    gap: 200px; /* เว้นระยะห่างระหว่างแต่ละสถานะ */
+    padding: 50px;
+}
+
+.status-item {
+    padding: 10px;
+    /* คุณสามารถกำหนดสไตล์เพิ่มเติมได้ตามต้องการ เช่น สีตัวอักษร, พื้นหลัง */
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+
+    /* ... สไตล์อื่นๆ */
+}
+
+.status-icon-container {
+    width: 70px; /* Adjust width as needed */
+    height: 70px; /* Adjust height as needed */
+    border-radius: 50%; /* Make the container circular */
+    /* border: 1px solid #d3cccc; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-item-upcoming {
+    /* สไตล์สำหรับสถานะ Upcoming */
+    background-color: white;
+}
+
+.status-item-active {
+    /* สไตล์สำหรับสถานะ Active */
+    background-color: black;
+}
+
+.status-item-close {
+    /* สไตล์สำหรับสถานะ Close */
+    background-color: white;
+}
+
+.status-icon {
+    width: 36px;
+    height: auto; /* กำหนดให้ width และ height เท่ากัน เพื่อให้เป็นรูปวงกลม */
+    display: flex;
 }

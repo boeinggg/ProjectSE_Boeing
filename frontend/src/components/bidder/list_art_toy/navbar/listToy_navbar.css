@@ -19,8 +19,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 0 1rem;
-    box-shadow: 0px 5px 10px 0px rgba(217, 217, 217, 0.5);
-    border: 1px solid #403e3e;
+    /* box-shadow: 0px 5px 10px 0px rgba(217, 217, 217, 0.5); */
+    border-bottom: 1px solid #d3cccc;
 }
 
 .logo {
@@ -55,13 +55,20 @@
     color: #848282d2;
 }
 
+.dropdown {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    /* Move the dropdown icon to the right using margin-left */
+    margin-right: 20px;
+}
 
 .dropdown svg {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 24px; /* ขนา��ของไอคอน */
-    width: 24px; /* ขนา��ของไอคอน */
+    height: auto; /* ขนา��ของไอคอน */
+    width: 26px; /* ขนา��ของไอคอน */
     color: #000;
 }
 
