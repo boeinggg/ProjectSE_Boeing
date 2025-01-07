@@ -1,21 +1,21 @@
 import { ArtToysInterface } from "./ArtToy";
 
 export interface AuctionInterface {
-    id?: number;
+    ID?: number;
 
-    startPrice?: number;
+    StartPrice?: number;
 
-    bidIncrement?: number;
+    BidIncrement?: number;
 
     CurrentPrice?: number;
 
     EndPrice?: number;
 
-    startDateTime?: Date;
+    StartDateTime?: Date;
 
-    endDateTime?: Date;
+    EndDateTime?: Date;
 
-    status?: string;
+    Status?: string;
 
     ArtToy?: ArtToysInterface;
     ArtToyID?: number;

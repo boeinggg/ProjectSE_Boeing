@@ -8,6 +8,10 @@ import upcomming from "../../../assets/next-date.png";
 import active from "../../../assets/auction.png";
 import close from "../../../assets/box.png";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
+import { AuctionInterface } from "../../../interfaces/Auction";
+import { GetAuction } from "../../../services/https/seller/auction";
+import ActiveIcon from "../../../assets/up.png";
+import UpPrice from "../../../assets/up-arrow.png";
 
 interface CategoryInterface {
     ID: number;
@@ -18,6 +22,7 @@ interface CategoryInterface {
 const ListArtToy: React.FC = () => {
     const [categories, setCategories] = useState<CategoryInterface[] | null>(null);
     const [artToys, setArtToys] = useState<ArtToysInterface[]>([]);
+    const [auctions, setAUctions] = useState<AuctionInterface[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -48,7 +53,6 @@ const ListArtToy: React.FC = () => {
                 const data: ArtToysInterface[] = await response.data; // Type the response data
 
                 setArtToys(data);
-                console.log(data);
             } catch (error) {
                 console.error("Error fetching categories:", error);
                 // Handle error gracefully (e.g., display an error message to the user)
@@ -56,6 +60,22 @@ const ListArtToy: React.FC = () => {
         };
 
         fetchArtToy();
+    }, []);
+
+    useEffect(() => {
+        const fetchAuction = async () => {
+            try {
+                const response = await GetAuction();
+                const data: AuctionInterface[] = await response.data; // Type the response data
+
+                setAUctions(data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                // Handle error gracefully (e.g., display an error message to the user)
+            }
+        };
+
+        fetchAuction();
     }, []);
 
     return (
@@ -101,15 +121,41 @@ const ListArtToy: React.FC = () => {
                 </div>
                 <h1>ART TOY</h1>
                 <div className="list">
-                    <div className="card">
-                        {artToys.map((artToy) => (
-                            <div key={artToy.id}>
-                                {/* <img src={artToy.picture} alt="Art Toy" className="arttoy-image" /> */}
-                                <h1>{artToy.name}</h1>
-                                <p>{artToy.brand}</p>
-                            </div>
-                        ))}
-                    </div>
+                    {artToys.map((artToy) => (
+                        <div className="card" key={artToy.ID}>
+                            <img src={artToy.Picture} alt={artToy.Name} />
+                            <h2>{artToy.Name}</h2>
+                            <h3>{artToy.Brand}</h3>
+                            <h4>
+                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                    <img
+                                        src={ActiveIcon}
+                                        alt="Active Icon"
+                                        style={{ width: "16px", height: "16px", verticalAlign: "middle", marginRight: "5px" }}
+                                    />
+                                )}
+                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                            </h4>
+
+                            <h5>Highest bid</h5>
+                            <h6>
+                                ฿ {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.CurrentPrice?.toLocaleString()}
+                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                    <img
+                                        src={UpPrice}
+                                        alt="Active Icon"
+                                        className="active-icon" // ใช้ class สำหรับการกระพริบ
+                                        style={{
+                                            width: "20px",
+                                            height: "auto",
+                                            verticalAlign: "middle",
+                                            marginLeft: "5px",
+                                        }}
+                                    />
+                                )}
+                            </h6>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

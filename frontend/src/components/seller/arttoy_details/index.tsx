@@ -11,17 +11,17 @@ import { CategoryInterface } from "../../../interfaces/Category";
 
 const ArtToyDetail: React.FC = () => {
     const [formValues, setFormValues] = useState({
-        name: "",
-        brand: "",
-        category: "",
-        size: "",
-        material: "",
-        description: "",
-        startPrice: "",
-        bidIncrement: "",
-        startDateTime: new Date(),
-        endDateTime: new Date(),
-        status: "",
+        Name: "",
+        Brand: "",
+        Category: "",
+        Size: "",
+        Material: "",
+        Description: "",
+        StartPrice: "",
+        BidIncrement: "",
+        StartDateTime: new Date(),
+        EndDateTime: new Date(),
+        Status: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [uploadedFiles, setUploadedFiles] = useState<string[]>([]); // Store Base64 strings here
@@ -34,7 +34,7 @@ const ArtToyDetail: React.FC = () => {
 
         setFormValues((prev) => ({
             ...prev,
-            [id]: id === "startDateTime" || id === "endDateTime" ? new Date(value) : value,
+            [id]: id === "StartDateTime" || id === "EndDateTime" ? new Date(value) : value,
         }));
         setErrors((prev) => ({ ...prev, [id]: "" }));
     };
@@ -57,31 +57,31 @@ const ArtToyDetail: React.FC = () => {
     useEffect(() => {
         const updateStatus = () => {
             const now = new Date();
-            if (formValues.startDateTime > now) {
-                setFormValues((prev) => ({ ...prev, status: "upcoming" }));
-            } else if (formValues.startDateTime <= now && formValues.endDateTime > now) {
-                setFormValues((prev) => ({ ...prev, status: "active" }));
-            } else if (formValues.endDateTime <= now) {
-                setFormValues((prev) => ({ ...prev, status: "close" }));
+            if (formValues.StartDateTime > now) {
+                setFormValues((prev) => ({ ...prev, Status: "upcoming" }));
+            } else if (formValues.StartDateTime <= now && formValues.EndDateTime > now) {
+                setFormValues((prev) => ({ ...prev, Status: "active" }));
+            } else if (formValues.EndDateTime <= now) {
+                setFormValues((prev) => ({ ...prev, Status: "close" }));
             }
         };
 
         updateStatus();
-    }, [formValues.startDateTime, formValues.endDateTime]);
+    }, [formValues.StartDateTime, formValues.EndDateTime]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-        if (!formValues.name.trim()) newErrors.name = "Name is required.";
-        if (!formValues.brand.trim()) newErrors.brand = "Brand is required.";
-        if (!formValues.category) newErrors.category = "Category is required.";
-        if (!formValues.size.trim()) newErrors.size = "Size is required.";
-        if (!formValues.material.trim()) newErrors.material = "Material is required.";
-        if (!formValues.description.trim()) newErrors.description = "Description is required.";
-        if (!formValues.startPrice.trim()) newErrors.startPrice = "Start Price is required.";
-        if (!formValues.bidIncrement.trim()) newErrors.bidIncrement = "Bid Increment is required.";
-        if (!formValues.startDateTime) newErrors.startDate = "Start Date is required.";
-        if (!formValues.endDateTime) newErrors.endDate = "End Date is required.";
-        if (!formValues.status) newErrors.status = "Status is required.";
+        if (!formValues.Name.trim()) newErrors.Name = "Name is required.";
+        if (!formValues.Brand.trim()) newErrors.Brand = "Brand is required.";
+        if (!formValues.Category) newErrors.Category = "Category is required.";
+        if (!formValues.Size.trim()) newErrors.Size = "Size is required.";
+        if (!formValues.Material.trim()) newErrors.Material = "Material is required.";
+        if (!formValues.Description.trim()) newErrors.Description = "Description is required.";
+        if (!formValues.StartPrice.trim()) newErrors.StartPrice = "Start Price is required.";
+        if (!formValues.BidIncrement.trim()) newErrors.BidIncrement = "Bid Increment is required.";
+        if (!formValues.StartDateTime) newErrors.StartDate = "Start Date is required.";
+        if (!formValues.EndDateTime) newErrors.EndDate = "End Date is required.";
+        if (!formValues.Status) newErrors.Status = "Status is required.";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -89,14 +89,14 @@ const ArtToyDetail: React.FC = () => {
 
     const handleConfirm = async () => {
         const values: ArtToysInterface = {
-            name: formValues.name,
-            brand: formValues.brand,
-            description: formValues.description,
-            material: formValues.material,
-            size: formValues.size,
-            categoryID: Number(formValues.category),
-            sellerID: 1,
-            picture: uploadedFiles.join(","),
+            Name: formValues.Name,
+            Brand: formValues.Brand,
+            Description: formValues.Description,
+            Material: formValues.Material,
+            Size: formValues.Size,
+            CategoryID: Number(formValues.Category),
+            SellerID: 1,
+            Picture: uploadedFiles.join(","),
         };
 
         if (validateForm()) {
@@ -105,13 +105,13 @@ const ArtToyDetail: React.FC = () => {
                 const arttoyID = await GetArtToyID();
                 console.log(arttoyID);
                 const auctionDetails: AuctionInterface = {
-                    startPrice: Number(formValues.startPrice),
-                    bidIncrement: Number(formValues.bidIncrement),
-                    CurrentPrice: Number(formValues.startPrice),
-                    EndPrice: Number(formValues.startPrice),
-                    startDateTime: new Date(formValues.startDateTime.getTime() + 7 * 60 * 60 * 1000), // เพิ่ม 7 ชั่วโมง
-                    endDateTime: new Date(formValues.endDateTime.getTime() + 7 * 60 * 60 * 1000),
-                    status: formValues.status,
+                    StartPrice: Number(formValues.StartPrice),
+                    BidIncrement: Number(formValues.BidIncrement),
+                    CurrentPrice: Number(formValues.StartPrice),
+                    EndPrice: Number(formValues.StartPrice),
+                    StartDateTime: new Date(formValues.StartDateTime.getTime() + 7 * 60 * 60 * 1000), // เพิ่ม 7 ชั่วโมง
+                    EndDateTime: new Date(formValues.EndDateTime.getTime() + 7 * 60 * 60 * 1000),
+                    Status: formValues.Status,
                     ArtToyID: arttoyID,
                 };
                 const res2 = await CreateAuction(auctionDetails);
@@ -123,17 +123,17 @@ const ArtToyDetail: React.FC = () => {
 
                 // Reset form values and uploaded files
                 setFormValues({
-                    name: "",
-                    brand: "",
-                    category: "",
-                    size: "",
-                    material: "",
-                    description: "",
-                    startPrice: "",
-                    bidIncrement: "",
-                    startDateTime: new Date(),
-                    endDateTime: new Date(),
-                    status: "",
+                    Name: "",
+                    Brand: "",
+                    Category: "",
+                    Size: "",
+                    Material: "",
+                    Description: "",
+                    StartPrice: "",
+                    BidIncrement: "",
+                    StartDateTime: new Date(),
+                    EndDateTime: new Date(),
+                    Status: "",
                 });
                 setUploadedFiles([]);
                 setIsDropzoneVisible(true); // Reset Dropzone visibility
@@ -182,25 +182,25 @@ const ArtToyDetail: React.FC = () => {
                             <div className="row">
                                 <Field
                                     label="Name"
-                                    id="name"
+                                    id="Name"
                                     placeholder="Enter name.."
-                                    value={formValues.name}
+                                    value={formValues.Name}
                                     onChange={handleInputChange}
-                                    error={errors.name}
+                                    error={errors.Name}
                                 />
                                 <Field
                                     label="Brand"
-                                    id="brand"
+                                    id="Brand"
                                     placeholder="Enter brand.."
-                                    value={formValues.brand}
+                                    value={formValues.Brand}
                                     onChange={handleInputChange}
-                                    error={errors.brand}
+                                    error={errors.Brand}
                                 />
                             </div>
                             <div className="row">
                                 <SelectField
                                     label="Category"
-                                    id="category"
+                                    id="Category"
                                     options={[
                                         { value: "", label: "Select Category" }, // ตัวเลือกเริ่มต้น
                                         ...categories.map((category) => ({
@@ -208,36 +208,36 @@ const ArtToyDetail: React.FC = () => {
                                             label: category.Name || "", // Handle potential missing Name
                                         })),
                                     ]}
-                                    value={formValues.category}
+                                    value={formValues.Category}
                                     onChange={handleInputChange}
-                                    error={errors.category}
+                                    error={errors.Category}
                                 />
 
                                 <Field
                                     label="Size"
-                                    id="size"
+                                    id="Size"
                                     placeholder="Enter size.."
-                                    value={formValues.size}
+                                    value={formValues.Size}
                                     onChange={handleInputChange}
-                                    error={errors.size}
+                                    error={errors.Size}
                                 />
                             </div>
                             <Field
                                 label="Material"
-                                id="material"
+                                id="Material"
                                 placeholder="Enter material.."
-                                value={formValues.material}
+                                value={formValues.Material}
                                 onChange={handleInputChange}
-                                error={errors.material}
+                                error={errors.Material}
                             />
                             <Field
                                 label="Description"
-                                id="description"
+                                id="Description"
                                 placeholder="Enter a description for your art toy.."
                                 type="textarea"
-                                value={formValues.description}
+                                value={formValues.Description}
                                 onChange={handleInputChange}
-                                error={errors.description}
+                                error={errors.Description}
                             />
                         </div>
                     </div>
@@ -267,45 +267,45 @@ const ArtToyDetail: React.FC = () => {
                         <div className="row">
                             <Field
                                 label="Start Price"
-                                id="startPrice"
+                                id="StartPrice"
                                 placeholder="Enter start price.."
-                                value={formValues.startPrice}
+                                value={formValues.StartPrice}
                                 onChange={handleInputChange}
-                                error={errors.startPrice}
+                                error={errors.StartPrice}
                             />
                             <Field
                                 label="Bid Increment"
-                                id="bidIncrement"
+                                id="BidIncrement"
                                 placeholder="Enter bid increment.."
-                                value={formValues.bidIncrement}
+                                value={formValues.BidIncrement}
                                 onChange={handleInputChange}
-                                error={errors.bidIncrement}
+                                error={errors.BidIncrement}
                             />
                         </div>
                         <div className="row">
                             <Field
                                 label="Start Date Time"
-                                id="startDateTime"
+                                id="StartDateTime"
                                 type="datetime-local"
                                 value={new Date(
-                                    formValues.startDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
+                                    formValues.StartDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
                                 )
                                     .toISOString()
                                     .slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
                                 onChange={handleInputChange}
-                                error={errors.startDate}
+                                error={errors.StartDate}
                             />
                             <Field
                                 label="End Date Time"
-                                id="endDateTime"
+                                id="EndDateTime"
                                 type="datetime-local"
                                 value={new Date(
-                                    formValues.endDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
+                                    formValues.EndDateTime.getTime() + 7 * 60 * 60 * 1000 // เพิ่ม 7 ชั่วโมง (แปลงเป็นเวลาไทย)
                                 )
                                     .toISOString()
                                     .slice(0, 16)} // Format to "YYYY-MM-DDTHH:mm"
                                 onChange={handleInputChange}
-                                error={errors.endDate}
+                                error={errors.EndDate}
                             />
                         </div>
                         {/* <SelectField
