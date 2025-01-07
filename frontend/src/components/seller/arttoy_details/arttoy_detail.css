@@ -23,7 +23,7 @@
     margin-bottom: 24px;
 }
 
-.detail-header {
+.detail-header.detail-header {
     display: flex;
     justify-content: space-between;
 }

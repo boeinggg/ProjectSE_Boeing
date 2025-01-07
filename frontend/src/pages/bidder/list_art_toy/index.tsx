@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import "./list_art_toy.css";
 
 import Navbar from "../../../components/bidder/list_art_toy/navbar";
-import { GetCategory } from "../../../services/https/seller/arttoy";
+import { GetArtToy, GetCategory } from "../../../services/https/seller/arttoy";
 import banner from "../../../assets/green.png";
 import upcomming from "../../../assets/next-date.png";
 import active from "../../../assets/auction.png";
 import close from "../../../assets/box.png";
+import { ArtToysInterface } from "../../../interfaces/ArtToy";
 
 interface CategoryInterface {
     ID: number;
@@ -16,6 +17,7 @@ interface CategoryInterface {
 
 const ListArtToy: React.FC = () => {
     const [categories, setCategories] = useState<CategoryInterface[] | null>(null);
+    const [artToys, setArtToys] = useState<ArtToysInterface[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -31,7 +33,6 @@ const ListArtToy: React.FC = () => {
                 // Handle error gracefully (e.g., display an error message to the user)
             }
         };
-
         fetchCategories();
     }, []);
 
@@ -40,8 +41,25 @@ const ListArtToy: React.FC = () => {
         console.log("Clicked category:", category);
     };
 
+    useEffect(() => {
+        const fetchArtToy = async () => {
+            try {
+                const response = await GetArtToy();
+                const data: ArtToysInterface[] = await response.data; // Type the response data
+
+                setArtToys(data);
+                console.log(data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                // Handle error gracefully (e.g., display an error message to the user)
+            }
+        };
+
+        fetchArtToy();
+    }, []);
+
     return (
-        <div className="big-screen">
+        <div className="big-screen-list">
             <div>
                 <Navbar />
                 <div className="tab_category">
@@ -62,7 +80,7 @@ const ListArtToy: React.FC = () => {
                     <img src={banner} alt="Banner" className="banner" />
                 </div>
                 <div className="status">
-                <span className="status-item ">
+                    <span className="status-item ">
                         <div className="status-icon-container status-item-upcoming">
                             <img src={upcomming} alt="Upcoming" className="status-icon" />
                         </div>
@@ -81,7 +99,18 @@ const ListArtToy: React.FC = () => {
                         Close
                     </span>
                 </div>
-                <div>fffff</div>
+                <h1>ART TOY</h1>
+                <div className="list">
+                    <div className="card">
+                        {artToys.map((artToy) => (
+                            <div key={artToy.id}>
+                                {/* <img src={artToy.picture} alt="Art Toy" className="arttoy-image" /> */}
+                                <h1>{artToy.name}</h1>
+                                <p>{artToy.brand}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
