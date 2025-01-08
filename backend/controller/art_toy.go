@@ -108,16 +108,51 @@ func ListArtToys(c *gin.Context) {
 }
 
 // DELETE /arttoys/:id
+// func DeleteArtToy(c *gin.Context) {
+
+// 	id := c.Param("id")
+// 	db := config.DB()
+// 	if tx := db.Exec("DELETE FROM art_toys WHERE id = ?", id); tx.RowsAffected == 0 {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "id not found"})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, gin.H{"message": "Deleted successful"})
+
+// }
+
 func DeleteArtToy(c *gin.Context) {
 
 	id := c.Param("id")
 	db := config.DB()
-	if tx := db.Exec("DELETE FROM art_toys WHERE id = ?", id); tx.RowsAffected == 0 {
+
+	// Begin a database transaction
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		} else if err := tx.Commit().Error; err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Execute the DELETE query within the transaction
+	result := tx.Exec("DELETE FROM art_toys WHERE id = ?", id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	rowsAffected := result.RowsAffected
+	if rowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "id not found"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Deleted successful"})
 
+	c.JSON(http.StatusOK, gin.H{"message": "Deleted successful"})
 }
 
 // PATCH /arttoys

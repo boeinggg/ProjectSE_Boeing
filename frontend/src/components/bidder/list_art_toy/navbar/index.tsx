@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
         setSearchText(e.target.value);
     };
     return (
-        <div className="custom-navbar-list-toy">
+        <div className="custom_navbar_list_toy">
             <div className="logo">
                 <div className="logo-icon">
                     <img src={icon} alt="Logo" />

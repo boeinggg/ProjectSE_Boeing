@@ -15,7 +15,21 @@ import (
 func TestStartPrice(t *testing.T) {
         g := NewGomegaWithT(t)
 
+		
+
         t.Run("start_price is required", func(t *testing.T) {
+
+				artToy := entity.ArtToy{
+					Name:           "CRYBABY Sad Club Series-Plush Flower Blind Box", // ผิดตรงนี้
+					Brand:          "Popmart",
+					Material:       "100% polyester",
+					Size:           "16cm*6cm*29cm",
+					Description:    "This box is sky blue",
+					Picture:        "A detailed profile description.",
+					CategoryID:     1,
+					SellerID:       1,
+				}
+
                 auction := entity.AuctionDetail{
                         StartPrice:    0.0, // Invalid: StartPrice must be greater than 0
                         BidIncrement:  0,
@@ -24,6 +38,7 @@ func TestStartPrice(t *testing.T) {
                         EndDateTime:   time.Now().Add(24 * time.Hour),
                         Status:        "open",
                         ArtToyID:      1,
+						ArtToy:        artToy,
                 }
 
                 // Validate the struct
@@ -41,15 +56,27 @@ func TestStartPrice(t *testing.T) {
                 g.Expect(err.Error()).To(ContainSubstring("Start Price is required"))
         })
 
-		t.Run("Start Price must be a number", func(t *testing.T) {
+		t.Run("Start Price must be greater than 0", func(t *testing.T) {
+
+			artToy := entity.ArtToy{
+				Name:           "CRYBABY Sad Club Series-Plush Flower Blind Box", // ผิดตรงนี้
+				Brand:          "Popmart",
+				Material:       "100% polyester",
+				Size:           "16cm*6cm*29cm",
+				Description:    "This box is sky blue",
+				Picture:        "A detailed profile description.",
+				CategoryID:     1,
+				SellerID:       1,
+			}
 			auction := entity.AuctionDetail{
-					StartPrice:    0.0, // Invalid: StartPrice must be greater than 0
-					BidIncrement:  0,
+					StartPrice:    -5, // Invalid: StartPrice must be greater than 0
+					BidIncrement:  1,
 					CurrentPrice: 100.0,
 					StartDateTime: time.Now(),
 					EndDateTime:   time.Now().Add(24 * time.Hour),
 					Status:        "open",
 					ArtToyID:      1,
+					ArtToy:        artToy,
 			}
 
 			// Validate the struct
@@ -64,7 +91,7 @@ func TestStartPrice(t *testing.T) {
 			// Validation should fail
 			g.Expect(ok).NotTo(BeTrue())
 			g.Expect(err).NotTo(BeNil())
-			g.Expect(err.Error()).To(ContainSubstring("Start Price must be a number"))
+			g.Expect(err.Error()).To(ContainSubstring("Start Price must be greater than 0"))
 	})
 
 		t.Run("Bid is required", func(t *testing.T) {

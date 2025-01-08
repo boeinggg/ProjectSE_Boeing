@@ -17,6 +17,14 @@
     overflow: hidden;
 }
 
+.big-screen-list h1 {
+    font-weight: 600;
+    font-size: 24px;
+    color: black;
+    padding: 10px 100px;
+    overflow: hidden;
+}
+
 .tab_category {
     display: flex;
     overflow: auto;
@@ -48,7 +56,25 @@
 .banner {
     width: 100%;
     height: 50vh;
+    
+}
+
+.header_list {
+    /* Add a class for sticky behavior */
+    display: fixed;
+    position: fixed;
+    top: 0;
+    z-index: 1;
+}
+.list_data {
     overflow: auto;
+    position: sticky;
+}
+.list {
+    padding: 10px 100px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 10px;
 }
 
 .status {
@@ -103,18 +129,6 @@
     display: flex;
 }
 
-.big-screen-list h1 {
-    font-weight: 600;
-    font-size: 24px;
-    color: black;
-    padding: 10px 100px;
-}
-.list {
-    padding: 10px 100px;
-    display: grid;
-    grid-template-columns: auto 1fr; /* แบ่งพื้นที่เป็น 2 คอลัมน์ */
-    grid-gap: 10px;
-}
 .card {
     background-color: white;
     padding: 10px;
@@ -124,7 +138,8 @@
 
 .card img {
     width: 100%;
-    height: auto;
+    height: 200px;
+    object-fit: cover;
 }
 .card h2 {
     font-weight: 500;

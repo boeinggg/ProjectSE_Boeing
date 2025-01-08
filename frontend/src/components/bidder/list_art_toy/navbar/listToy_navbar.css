@@ -9,17 +9,18 @@
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
 }
-.custom-navbar-list-toy {
-    background-color: white; /* เปลี่ยนพื้นหลังเป็นสีฟ้าตัวอย่าง */
-    color: white; /* กำหนดสีข้อความ */
-    display: flex; /* จัดการ layout */
-    height: 8vh; /* ตั้งความสูง */
+.custom_navbar_list_toy {
+    background-color: white;
+    color: white;
+    display: flex;
+    height: 8vh;
     width: 100vw;
     position: sticky;
-    justify-content: space-between;
+    /* top: 0; */
+    justify-content: space-between; 
     align-items: center;
     padding: 0 1rem;
-    /* box-shadow: 0px 5px 10px 0px rgba(217, 217, 217, 0.5); */
+    z-index: 999;
     border-bottom: 1px solid #d3cccc;
 }
 
@@ -78,5 +79,3 @@
     color: green;
     cursor: pointer;
 }
-
-

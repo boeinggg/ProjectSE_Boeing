@@ -81,81 +81,85 @@ const ListArtToy: React.FC = () => {
     return (
         <div className="big-screen-list">
             <div>
-                <Navbar />
-                <div className="tab_category">
-                    <div className="tabs">
-                        {categories &&
-                            categories.map((category) => (
-                                <button
-                                    key={category.ID}
-                                    onClick={() => handleTabClick(category)}
-                                    className={`tab ${category.isActive ? "active" : ""}`} // Add active class conditionally
-                                >
-                                    {category.Name}
-                                </button>
-                            ))}
+                <div className="header_list">
+                    <Navbar />
+                    <div className="tab_category">
+                        <div className="tabs">
+                            {categories &&
+                                categories.map((category) => (
+                                    <button
+                                        key={category.ID}
+                                        onClick={() => handleTabClick(category)}
+                                        className={`tab ${category.isActive ? "active" : ""}`} // Add active class conditionally
+                                    >
+                                        {category.Name}
+                                    </button>
+                                ))}
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <img src={banner} alt="Banner" className="banner" />
-                </div>
-                <div className="status">
-                    <span className="status-item ">
-                        <div className="status-icon-container status-item-upcoming">
-                            <img src={upcomming} alt="Upcoming" className="status-icon" />
-                        </div>
-                        Upcoming
-                    </span>
-                    <span className="status-item">
-                        <div className="status-icon-container status-item-active">
-                            <img src={active} alt="Active" className="status-icon" />
-                        </div>
-                        Active
-                    </span>
-                    <span className="status-item">
-                        <div className="status-icon-container status-item-close">
-                            <img src={close} alt="Close" className="status-icon" />
-                        </div>
-                        Close
-                    </span>
-                </div>
-                <h1>ART TOY</h1>
-                <div className="list">
-                    {artToys.map((artToy) => (
-                        <div className="card" key={artToy.ID}>
-                            <img src={artToy.Picture} alt={artToy.Name} />
-                            <h2>{artToy.Name}</h2>
-                            <h3>{artToy.Brand}</h3>
-                            <h4>
-                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
-                                    <img
-                                        src={ActiveIcon}
-                                        alt="Active Icon"
-                                        style={{ width: "16px", height: "16px", verticalAlign: "middle", marginRight: "5px" }}
-                                    />
-                                )}
-                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
-                            </h4>
+                <div className="list_data">
+                    <div>
+                        <img src={banner} alt="Banner" className="banner" />
+                    </div>
+                    <div className="status">
+                        <span className="status-item ">
+                            <div className="status-icon-container status-item-upcoming">
+                                <img src={upcomming} alt="Upcoming" className="status-icon" />
+                            </div>
+                            Upcoming
+                        </span>
+                        <span className="status-item">
+                            <div className="status-icon-container status-item-active">
+                                <img src={active} alt="Active" className="status-icon" />
+                            </div>
+                            Active
+                        </span>
+                        <span className="status-item">
+                            <div className="status-icon-container status-item-close">
+                                <img src={close} alt="Close" className="status-icon" />
+                            </div>
+                            Close
+                        </span>
+                    </div>
+                    <h1>ART TOY</h1>
+                    <div className="list">
+                        {artToys.map((artToy) => (
+                            <div className="card" key={artToy.ID}>
+                                <img src={artToy.Picture} alt={artToy.Name} />
+                                <h2>{artToy.Name}</h2>
+                                <h3>{artToy.Brand}</h3>
+                                <h4>
+                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                        <img
+                                            src={ActiveIcon}
+                                            alt="Active Icon"
+                                            style={{ width: "16px", height: "16px", verticalAlign: "middle", marginRight: "5px" }}
+                                        />
+                                    )}
+                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                                </h4>
 
-                            <h5>Highest bid</h5>
-                            <h6>
-                                ฿ {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.CurrentPrice?.toLocaleString()}
-                                {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
-                                    <img
-                                        src={UpPrice}
-                                        alt="Active Icon"
-                                        className="active-icon" // ใช้ class สำหรับการกระพริบ
-                                        style={{
-                                            width: "20px",
-                                            height: "auto",
-                                            verticalAlign: "middle",
-                                            marginLeft: "5px",
-                                        }}
-                                    />
-                                )}
-                            </h6>
-                        </div>
-                    ))}
+                                <h5>Highest bid</h5>
+                                <h6>
+                                    ฿ {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.CurrentPrice?.toLocaleString() || "0"}
+                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                        <img
+                                            src={UpPrice}
+                                            alt="Active Icon"
+                                            className="active-icon" // ใช้ class สำหรับการกระพริบ
+                                            style={{
+                                                width: "20px",
+                                                height: "auto",
+                                                verticalAlign: "middle",
+                                                marginLeft: "5px",
+                                            }}
+                                        />
+                                    )}
+                                </h6>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
