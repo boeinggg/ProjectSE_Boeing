@@ -56,7 +56,6 @@
 .banner {
     width: 100%;
     height: 50vh;
-    
 }
 
 .header_list {
@@ -69,6 +68,7 @@
 .list_data {
     overflow: auto;
     position: sticky;
+    margin-top: 16vh;
 }
 .list {
     padding: 10px 100px;

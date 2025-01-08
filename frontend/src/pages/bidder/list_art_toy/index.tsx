@@ -80,7 +80,7 @@ const ListArtToy: React.FC = () => {
 
     return (
         <div className="big-screen-list">
-            <div>
+            <div style={{width: "100%"}}>
                 <div className="header_list">
                     <Navbar />
                     <div className="tab_category">
