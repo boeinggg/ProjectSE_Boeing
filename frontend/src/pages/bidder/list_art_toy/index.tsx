@@ -80,7 +80,7 @@ const ListArtToy: React.FC = () => {
 
     return (
         <div className="big-screen-list">
-            <div style={{width: "100%"}}>
+            <div style={{ width: "100%" }}>
                 <div className="header_list">
                     <Navbar />
                     <div className="tab_category">
@@ -130,7 +130,7 @@ const ListArtToy: React.FC = () => {
                                 <h2>{artToy.Name}</h2>
                                 <h3>{artToy.Brand}</h3>
                                 <h4>
-                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "Active" && (
                                         <img
                                             src={ActiveIcon}
                                             alt="Active Icon"
@@ -143,7 +143,7 @@ const ListArtToy: React.FC = () => {
                                 <h5>Highest bid</h5>
                                 <h6>
                                     ฿ {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.CurrentPrice?.toLocaleString() || "0"}
-                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "active" && (
+                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "Active" && (
                                         <img
                                             src={UpPrice}
                                             alt="Active Icon"

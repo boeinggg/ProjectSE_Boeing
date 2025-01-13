@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import "./arttoy_detail.css";
-import Button from "./button";
-import Dropzone from "./dropzone";
-import { CreateArtToy, GetArtToyID, GetCategory } from "../../../services/https/seller/arttoy";
-import { CreateAuction } from "../../../services/https/seller/auction";
-import { ArtToysInterface } from "../../../interfaces/ArtToy";
-import { AuctionInterface } from "../../../interfaces/Auction";
+import "../arttoy_detail.css";
+import Button from "../button";
+import Dropzone from "../dropzone";
+import { GetArtToyById, GetCategory, UpdateArtToysById } from "../../../../services/https/seller/arttoy";
+import { GetAutionById, UpdateAuctionById } from "../../../../services/https/seller/auction";
+import { ArtToysInterface } from "../../../../interfaces/ArtToy";
+import { AuctionInterface } from "../../../../interfaces/Auction";
 import { Toaster, toast } from "react-hot-toast";
-import { CategoryInterface } from "../../../interfaces/Category";
+import { CategoryInterface } from "../../../../interfaces/Category";
 import moment from "moment-timezone";
-const ArtToyDetail: React.FC = () => {
+
+const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
     const [formValues, setFormValues] = useState({
         Name: "",
         Brand: "",
@@ -24,30 +25,10 @@ const ArtToyDetail: React.FC = () => {
         Status: "",
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [uploadedFiles, setUploadedFiles] = useState<string[]>([]); // Store Base64 strings here
+    const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
     const [isDropzoneVisible, setIsDropzoneVisible] = useState(true);
     const MAX_FILES = 4;
     const [categories, setCategories] = useState<CategoryInterface[]>([]);
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { id, value } = e.target;
-
-        // แปลงเวลาจากเขตเวลาไทยเป็น UTC
-        if (id === "StartDateTime" || id === "EndDateTime") {
-            const localDateTime = moment.tz(value, "YYYY-MM-DDTHH:mm", "Asia/Bangkok");
-            setFormValues((prev) => ({
-                ...prev,
-                [id]: localDateTime.toDate(), // แปลงเป็น JavaScript Date object
-            }));
-        } else {
-            setFormValues((prev) => ({
-                ...prev,
-                [id]: value,
-            }));
-        }
-
-        setErrors((prev) => ({ ...prev, [id]: "" }));
-    };
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -65,19 +46,58 @@ const ArtToyDetail: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const updateStatus = () => {
-            const now = new Date();
-            if (formValues.StartDateTime > now) {
-                setFormValues((prev) => ({ ...prev, Status: "Upcoming" }));
-            } else if (formValues.StartDateTime <= now && formValues.EndDateTime > now) {
-                setFormValues((prev) => ({ ...prev, Status: "Active" }));
-            } else if (formValues.EndDateTime <= now) {
-                setFormValues((prev) => ({ ...prev, Status: "Close" }));
+        const fetchDetails = async () => {
+            try {
+                const artToyResponse = await GetArtToyById(id);
+                const auctionResponse = await GetAutionById(id);
+
+                if (artToyResponse?.data && auctionResponse?.data) {
+                    const artToyData = artToyResponse.data;
+                    const auctionData = auctionResponse.data;
+
+                    setFormValues({
+                        Name: artToyData.Name,
+                        Brand: artToyData.Brand,
+                        Category: artToyData.CategoryID.toString(),
+                        Size: artToyData.Size,
+                        Material: artToyData.Material,
+                        Description: artToyData.Description,
+                        StartPrice: auctionData.StartPrice.toString(),
+                        BidIncrement: auctionData.BidIncrement.toString(),
+                        StartDateTime: new Date(auctionData.StartDateTime),
+                        EndDateTime: new Date(auctionData.EndDateTime),
+                        Status: auctionData.Status,
+                    });
+
+                    setUploadedFiles(artToyData.Picture ? artToyData.Picture.split(",") : []);
+                }
+            } catch (error) {
+                console.error("Error fetching art toy or auction details:", error);
+                toast.error("Failed to load data.");
             }
         };
 
-        updateStatus();
-    }, [formValues.StartDateTime, formValues.EndDateTime]);
+        fetchDetails();
+    }, [id]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { id, value } = e.target;
+
+        if (id === "StartDateTime" || id === "EndDateTime") {
+            const localDateTime = moment.tz(value, "YYYY-MM-DDTHH:mm", "Asia/Bangkok");
+            setFormValues((prev) => ({
+                ...prev,
+                [id]: localDateTime.toDate(),
+            }));
+        } else {
+            setFormValues((prev) => ({
+                ...prev,
+                [id]: value,
+            }));
+        }
+
+        setErrors((prev) => ({ ...prev, [id]: "" }));
+    };
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -89,16 +109,13 @@ const ArtToyDetail: React.FC = () => {
         if (!formValues.Description.trim()) newErrors.Description = "Description is required.";
         if (!formValues.StartPrice.trim()) newErrors.StartPrice = "Start Price is required.";
         if (!formValues.BidIncrement.trim()) newErrors.BidIncrement = "Bid Increment is required.";
-        if (!formValues.StartDateTime) newErrors.StartDate = "Start Date is required.";
-        if (!formValues.EndDateTime) newErrors.EndDate = "End Date is required.";
-        if (!formValues.Status) newErrors.Status = "Status is required.";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleConfirm = async () => {
-        const values: ArtToysInterface = {
+        const artToyValues: ArtToysInterface = {
             Name: formValues.Name,
             Brand: formValues.Brand,
             Description: formValues.Description,
@@ -109,47 +126,25 @@ const ArtToyDetail: React.FC = () => {
             Picture: uploadedFiles.join(","),
         };
 
+        const auctionValues: AuctionInterface = {
+            StartPrice: Number(formValues.StartPrice),
+            BidIncrement: Number(formValues.BidIncrement),
+            CurrentPrice: Number(formValues.StartPrice),
+            EndPrice: Number(formValues.StartPrice),
+            StartDateTime: moment(formValues.StartDateTime).tz("Asia/Bangkok").utc().toDate(),
+            EndDateTime: moment(formValues.EndDateTime).tz("Asia/Bangkok").utc().toDate(),
+            Status: formValues.Status,
+            ArtToyID: Number(id),
+        };
+
         if (validateForm()) {
             try {
-                const res = await CreateArtToy(values);
-                const arttoyID = await GetArtToyID();
-                console.log(arttoyID);
-                const auctionDetails: AuctionInterface = {
-                    StartPrice: Number(formValues.StartPrice),
-                    BidIncrement: Number(formValues.BidIncrement),
-                    CurrentPrice: Number(formValues.StartPrice),
-                    EndPrice: Number(formValues.StartPrice),
-                    StartDateTime: moment(formValues.StartDateTime).tz("Asia/Bangkok").utc().toDate(),
-                    EndDateTime: moment(formValues.EndDateTime).tz("Asia/Bangkok").utc().toDate(),
-                    Status: formValues.Status,
-                    ArtToyID: arttoyID,
-                };
-                const res2 = await CreateAuction(auctionDetails);
-                console.log(res);
-                console.log(res2);
-
-                // Show success toast
-                toast.success("Data saved successfully!");
-
-                // Reset form values and uploaded files
-                setFormValues({
-                    Name: "",
-                    Brand: "",
-                    Category: "",
-                    Size: "",
-                    Material: "",
-                    Description: "",
-                    StartPrice: "",
-                    BidIncrement: "",
-                    StartDateTime: new Date(),
-                    EndDateTime: new Date(),
-                    Status: "",
-                });
-                setUploadedFiles([]);
-                setIsDropzoneVisible(true); // Reset Dropzone visibility
+                await UpdateArtToysById(id, artToyValues);
+                await UpdateAuctionById(id, auctionValues);
+                toast.success("Data updated successfully!");
             } catch (error) {
-                console.error("Error saving data:", error);
-                toast.error("An error occurred while saving the data.");
+                console.error("Error updating data:", error);
+                toast.error("An error occurred while updating the data.");
             }
         } else {
             toast.error("Please fill in all required fields.");
@@ -162,8 +157,68 @@ const ArtToyDetail: React.FC = () => {
             alert(`You can upload a maximum of ${MAX_FILES} images.`);
             return;
         }
-        setUploadedFiles(newFiles);
-        if (newFiles.length === MAX_FILES) setIsDropzoneVisible(false);
+
+        const resizeImage = async (file: string) => {
+            const img = new Image();
+            img.src = file;
+
+            return new Promise<string>((resolve) => {
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    let width = img.width;
+                    let height = img.height;
+
+                    // ปรับขนาดภาพตามสัดส่วน
+                    const MAX_WIDTH = 300;
+                    const MAX_HEIGHT = 300;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = (height * MAX_WIDTH) / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = (width * MAX_HEIGHT) / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx?.drawImage(img, 0, 0, width, height);
+
+                    // ฟังก์ชันที่จะบีบอัดจนกว่าไฟล์จะมีขนาดไม่เกิน 10KB
+                    const compressImage = (canvas: HTMLCanvasElement): string => {
+                        let quality = 1; // เริ่มต้นที่คุณภาพสูงสุด
+                        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+                        let size = (dataUrl.length * 3) / 4 / 1024; // คำนวณขนาดไฟล์ใน KB
+
+                        while (size > 10 && quality > 0.1) {
+                            quality -= 0.1; // ลดคุณภาพลง
+                            dataUrl = canvas.toDataURL("image/jpeg", quality);
+                            size = (dataUrl.length * 3) / 4 / 1024;
+                        }
+
+                        return dataUrl;
+                    };
+
+                    const compressedBase64 = compressImage(canvas);
+                    resolve(compressedBase64);
+                };
+            });
+        };
+
+        const processFiles = async () => {
+            const resizedFiles = await Promise.all(base64Files.map((file) => resizeImage(file)));
+            setUploadedFiles((prev) => [...prev, ...resizedFiles]);
+
+            if (newFiles.length === MAX_FILES) setIsDropzoneVisible(false);
+        };
+
+        processFiles();
     };
 
     const handleRemoveFile = (index: number) => {
@@ -178,7 +233,7 @@ const ArtToyDetail: React.FC = () => {
         <div className="detail">
             <Toaster />
             <div className="detail-header">
-                <h1>Add Your Art Toy</h1>
+                <h1>Edit Art Toy</h1>
                 <div>
                     <Button label="Cancel" variant="cancel" onClick={() => alert("Cancel button clicked")} />
                     <Button label="Confirm" variant="confirm" onClick={handleConfirm} />
@@ -334,6 +389,8 @@ const ArtToyDetail: React.FC = () => {
     );
 };
 
+export default EditArtToyDetail;
+
 const Field: React.FC<{
     label: string;
     id: string;
@@ -381,5 +438,3 @@ const SectionHeader: React.FC<{ step?: string; title: string }> = ({ step, title
         <h3>{title}</h3>
     </div>
 );
-
-export default ArtToyDetail;

@@ -6,19 +6,64 @@ interface DropzoneProps {
     maxFiles?: number;
 }
 
-const Dropzone: React.FC<DropzoneProps> = ({ onDrop, maxFiles = 10 }) => {
+const Dropzone: React.FC<DropzoneProps> = ({ onDrop, maxFiles = 4 }) => {
     const [isDragActive, setIsDragActive] = useState(false);
     const hiddenFileInput = useRef<HTMLInputElement | null>(null);
 
-    // Convert File to Base64 string
+    // Convert File to Base64 string after compressing
     const convertFileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
+            const img = new Image();
             const reader = new FileReader();
             reader.onloadend = () => {
-                resolve(reader.result as string); // Resolve with the Base64 string
+                img.src = reader.result as string;
             };
-            reader.onerror = reject; // Reject on error
+            reader.onerror = reject;
             reader.readAsDataURL(file);
+
+            img.onload = () => {
+                // Check the size of the original file
+                const originalSize = file.size; // Size in bytes
+                console.log("Original file size:", originalSize, "bytes");
+
+                // Create a canvas to resize the image
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    const maxWidth = 800; // Max width for the image
+                    const maxHeight = 800; // Max height for the image
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Scale the image while maintaining its aspect ratio
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    // Set the canvas size to the new dimensions
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Draw the image onto the canvas
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert canvas to base64 string with quality set
+                    const base64Data = canvas.toDataURL("image/jpeg", 0.7); // Set quality to 0.7 (can be adjusted)
+                    const compressedSize = (base64Data.length * 3) / 4; // Approximate size of Base64 string (in bytes)
+                    console.log("Compressed base64 size:", compressedSize, "bytes");
+                    console.log(base64Data)
+
+                    resolve(base64Data);
+                }
+            };
         });
     };
 

@@ -3,6 +3,7 @@ package controller
 import (
 	"log"
 	"net/http"
+	"time"
 
 	// "time"
 
@@ -170,4 +171,47 @@ func UpdateAuctionDetail(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Updated successful"})
 }
+
+func UpdateAllAuctionStatuses() {
+    db := config.DB()
+
+    var auctions []entity.AuctionDetail
+    if err := db.Find(&auctions).Error; err != nil {
+        log.Printf("Failed to fetch auction details: %v\n", err)
+        return
+    }
+
+    // สร้าง time zone สำหรับประเทศไทย (GMT+7)
+    thailandTimeZone := time.FixedZone("Asia/Bangkok", 7*60*60)
+
+    now := time.Now().In(thailandTimeZone) // ใช้เวลาตาม Time zone ของประเทศไทย
+    for _, auction := range auctions {
+
+        // แปลง StartDateTime และ EndDateTime ให้อยู่ใน Time zone ไทย
+        startDateTime := auction.StartDateTime.In(thailandTimeZone)
+        endDateTime := auction.EndDateTime.In(thailandTimeZone)
+
+        // ตรวจสอบเงื่อนไขสถานะ
+        if now.After(startDateTime) && now.Before(endDateTime) {
+            auction.Status = "Active" // หากเวลาอยู่ระหว่าง Start และ End
+        } else if now.After(endDateTime) {
+            auction.Status = "Close" // หากเวลาผ่านไปหลังจาก End Time
+        } else if now.Before(startDateTime) {
+            auction.Status = "Upcoming" // หากเวลายังไม่ถึง Start Time
+        }
+
+        log.Printf("Auction ID: %d | Now: %s | Start: %s | End: %s | Status: %s", auction.ID, now, startDateTime, endDateTime, auction.Status)
+
+        if err := db.Save(&auction).Error; err != nil {
+            log.Printf("Failed to update auction status for ID %d: %v\n", auction.ID, err)
+            continue
+        }
+    }
+
+    log.Println("All auction statuses updated successfully")
+}
+
+
+
+
 

@@ -9,6 +9,7 @@ import (
 	// "backend/middlewares"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
 const PORT = "3036"
@@ -21,9 +22,13 @@ func main() {
 	// Generate databases
 	config.SetupDatabase()
 
+	StartBackgroundJob()
+
 	r := gin.Default()
 
 	r.Use(CORSMiddleware())
+
+	
 
 	// r.POST("/login", controller.SignIn)
 
@@ -83,4 +88,12 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func StartBackgroundJob() {
+	c := cron.New()
+	c.AddFunc("@every 1m", func() {
+		controller.UpdateAllAuctionStatuses() // เรียกใช้ฟังก์ชันโดยไม่ต้องใช้ context
+	})
+	c.Start()
 }
