@@ -13,6 +13,6 @@ type Gender struct {
 	
 	Seller []Seller `gorm:"foreignKey:GenderID"`
 	
-	// Bidder []Bidder `gorm:"foreignKey:GenderID"`
+	Bidder []Bidder `gorm:"foreignKey:GenderID"`
 
 }

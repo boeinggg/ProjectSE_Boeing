@@ -18,6 +18,8 @@ type AuctionDetail struct {
         Status        string  `valid:"required~Status is required"`
         ArtToyID      uint    `valid:"required~ArtToyID is required"`
         ArtToy        ArtToy  `gorm:"foreignKey:ArtToyID"`
+
+        Bid []Bid `gorm:"foreignKey:AuctionDetailID"`
 }
 
 func init() {

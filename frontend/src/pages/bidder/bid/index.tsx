@@ -8,6 +8,8 @@ import { GetAutionById, UpdateAuctionStatus } from "../../../services/https/sell
 import { AuctionInterface } from "../../../interfaces/Auction";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { RiArrowDropUpLine } from "react-icons/ri";
+import { CreateBid } from "../../../services/https/bidder/bid";
+import { BidsInterface } from "../../../interfaces/Bid";
 
 interface CategoryInterface {
     ID: number;
@@ -23,8 +25,12 @@ const BidArtToy: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<{ [key: string]: boolean }>({}); // Track open/close state for each dropdown
     const [timeLeft, setTimeLeft] = useState<string>(""); // Countdown timer state
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+    const [bidAmount, setBidAmount] = useState<number>(0); // Track the bid amount
 
     const { id } = useParams<{ id: string }>();
+    const handleBidAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setBidAmount(parseFloat(e.target.value) || 0); // Update bid amount on input change
+    };
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -77,10 +83,11 @@ const BidArtToy: React.FC = () => {
             const difference = endTime - now;
 
             if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
                 const minutes = Math.floor((difference / (1000 * 60)) % 60);
                 const seconds = Math.floor((difference / 1000) % 60);
-                setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+                setTimeLeft(`${days},${hours},${minutes},${seconds}`);
             } else {
                 setTimeLeft("Auction Ended");
                 // Check if id is defined before calling UpdateAuctionStatus
@@ -101,6 +108,48 @@ const BidArtToy: React.FC = () => {
             ...prevState,
             [key]: !prevState[key],
         }));
+    };
+
+    const handlePlaceBid = async () => {
+        if (!auction) return;
+
+        const currentPrice = auction.CurrentPrice || 0;
+        const increment = auction.BidIncrement || 0;
+        const endTime = auction.EndDateTime ? new Date(auction.EndDateTime).getTime() : 0;
+        const now = new Date().getTime();
+
+        // Check if the bid is higher than the current price + increment
+        if (bidAmount <= currentPrice + increment) {
+            alert("Your bid must be higher than the current price plus the increment.");
+            return;
+        }
+
+        // Check if the auction has ended
+        if (now > endTime) {
+            alert("This auction has already ended.");
+            return;
+        }
+
+        // If everything is valid, create the bid
+        const bidData: BidsInterface = {
+            BidAmount: bidAmount,
+            AuctionID: auction.ID,
+            BidderID: 1, // Replace with actual bidder ID (from user authentication or context)
+        };
+
+        console.log("Bid Data:", bidData);
+
+        try {
+            const response = await CreateBid(bidData);
+            if (response.status === 200) {
+                alert("Bid placed successfully!");
+            } else {
+                alert("Failed to place bid.");
+            }
+        } catch (error) {
+            alert("An error occurred while placing your bid.");
+            console.error(error);
+        }
     };
 
     return (
@@ -173,8 +222,44 @@ const BidArtToy: React.FC = () => {
                                         />
                                     )}
                                 </div>
-                                <h1>Time Left</h1>
-                                <h2>{timeLeft}</h2>
+                                <h1 style={{ fontSize: "24px", fontWeight: "600", marginTop: "20px" }}>Time Left</h1>
+                                <div className="time_left_details">
+                                    <div className="time-box">
+                                        <h2>{timeLeft && timeLeft.split(",")[0]}</h2>
+                                        <h3>days</h3>
+                                    </div>
+                                    <div className="time-box">
+                                        <h2>{timeLeft && timeLeft.split(",")[1]}</h2>
+                                        <h3>hours</h3>
+                                    </div>
+                                    <div className="time-box">
+                                        <h2>{timeLeft && timeLeft.split(",")[2]}</h2>
+                                        <h3>minutes</h3>
+                                    </div>
+                                    <div className="time-box">
+                                        <h2>{timeLeft && timeLeft.split(",")[3]}</h2>
+                                        <h3>seconds</h3>
+                                    </div>
+                                </div>
+                                <div className="current_bid">
+                                    <h1>Current Bid:</h1>
+                                    <h2>฿{auction.CurrentPrice?.toLocaleString() || "0"}</h2>
+                                </div>
+                                <div className="current_bid">
+                                    <h1>Bid Increment:</h1>
+                                    <h2>฿{auction.BidIncrement?.toLocaleString() || "0"}</h2>
+                                </div>
+
+                                <input
+                                    type="number"
+                                    value={bidAmount}
+                                    placeholder="Enter your bid"
+                                    className="bid_input"
+                                    onChange={handleBidAmountChange}
+                                />
+                                <button onClick={handlePlaceBid} className="place-bid-btn">
+                                    Place Bid
+                                </button>
                             </div>
 
                             <div className="bid_arttoy_details">
@@ -228,7 +313,7 @@ const BidArtToy: React.FC = () => {
                                             <RiArrowDropDownLine style={{ width: "32px", height: "auto", color: "gray" }} />
                                         )}
                                     </summary>
-                                    <h5 style={{ wordWrap: "break-word", maxWidth: "590px" }}>{artToy.Description}</h5>
+                                    <h5 style={{ wordWrap: "break-word", maxWidth: "500px" }}>{artToy.Description}</h5>
                                 </details>
                             </div>
                         </div>

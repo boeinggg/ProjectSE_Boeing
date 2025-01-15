@@ -60,7 +60,11 @@ func main() {
 		router.PUT("/auctions/:id", controller.UpdateAuctionDetail)
 		router.DELETE("/auctions/:id", controller.DeleteAuctionDetail)
 		router.PUT("/auctions/:id/status", controller.UpdateAuctionStatus)
-		
+
+		// Bid Routes
+		router.GET("/bids", controller.ListBids)
+		router.GET("/bid/:id", controller.GetBid)
+		router.POST("/bids", controller.CreateBid)
 		}
 		
 	}
