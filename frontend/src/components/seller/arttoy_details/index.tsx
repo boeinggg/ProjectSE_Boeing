@@ -72,7 +72,7 @@ const ArtToyDetail: React.FC = () => {
             } else if (formValues.StartDateTime <= now && formValues.EndDateTime > now) {
                 setFormValues((prev) => ({ ...prev, Status: "Active" }));
             } else if (formValues.EndDateTime <= now) {
-                setFormValues((prev) => ({ ...prev, Status: "Close" }));
+                setFormValues((prev) => ({ ...prev, Status: "Closed" }));
             }
         };
 

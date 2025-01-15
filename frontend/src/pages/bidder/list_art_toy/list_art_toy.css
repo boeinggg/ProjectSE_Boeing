@@ -17,6 +17,14 @@
     overflow: hidden;
 }
 
+.big-screen-bid {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    overflow: hidden;
+}
+
 .big-screen-list h1 {
     font-weight: 600;
     font-size: 24px;
@@ -133,9 +141,9 @@
     background-color: white;
     padding: 10px;
     width: 300px;
-    height: 400px;
+    height: 414px;
     margin-bottom: 20px;
-    
+    cursor: pointer;
 }
 
 .card img {
@@ -176,6 +184,7 @@
 .card h6 {
     font-weight: 400;
     font-size: 18px;
+    margin-bottom: 20px;
 }
 
 @keyframes blink {
@@ -192,4 +201,165 @@
 
 .active-icon {
     animation: blink 1s infinite; /* ทำให้กระพริบทุกๆ 1 วินาที */
+}
+
+.bid_arttoy_detail {
+    margin-top: 16vh;
+    padding: 50px;
+    justify-items: center;
+    align-items: center;
+}
+
+/* .bid_arttoy_detail {
+    padding: 20px;
+    display: flex;
+    
+} */
+
+.bid_arttoy_container {
+    display: flex;
+    flex-direction: row; /* จัดเนื้อหาแนวนอน */
+    align-items: flex-start; /* จัดแนวเนื้อหาบนสุด */
+    gap: 100px; /* ระยะห่างระหว่างรูปภาพกับรายละเอียด */
+}
+
+.bid_arttoy_container img {
+    width: 500px;
+    height: 500px;
+    object-fit: cover;
+}
+
+.bid_arttoy_image {
+    max-width: 600px; /* จำกัดขนาดรูป */
+    height: auto;
+    border-radius: 8px; /* เพิ่มมุมโค้ง (ถ้าต้องการ) */
+}
+
+.bid_arttoy_details {
+    max-width: 80vw; /* จำกัดความกว้างของรายละเอียด */
+    text-align: left; /* จัดข้อความให้อยู่ทางซ้าย */
+}
+
+.bid_arttoy_details h1 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.bid_arttoy_details p {
+    margin: 10px 0;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.bid_arttoy_details h3 {
+    /* margin-top: 10px; */
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: #555; /* เพิ่มสีให้ดูสบายตา */
+}
+.price {
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 200px;
+    margin-top: 2rem;
+    border-bottom: 1px solid #989494;
+}
+
+.start_price {
+    justify-items: center;
+}
+
+.high_bid {
+    justify-items: center;
+}
+
+.price h4 {
+    font-weight: 500;
+    font-size: 12px;
+    color: #454444;
+}
+
+.price h5 {
+    font-weight: 500;
+    font-size: 24px;
+    color: black;
+    margin-bottom: 20px;
+}
+
+.arttoy-detail-dropdown {
+    /* Light background color */
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #989494;
+    padding-bottom: 30px;
+    overflow: hidden; /* ซ่อนเนื้อหาที่เกินออกมา */
+    transition: max-height 1s ease-out; /* เพิ่ม transition สำหรับการขยายความสูง */
+    max-height: 100px; /* เริ่มต้นด้วยความสูงเป็น 0 */
+}
+.arttoy-detail-dropdown[open] {
+    max-height: max-content; /* กำหนด max-height ที่ใหญ่พอสำหรับเนื้อหาทั้งหมด */
+}
+.arttoy-detail-dropdown summary {
+    font-weight: 600;
+    font-size: 16px;
+    color: black;
+    text-align: left;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.arttoy-detail-dropdown h4 {
+    font-weight: 400;
+    font-size: 16px;
+    color: #989494;
+    margin-top: 6px;
+    display: flex;
+}
+
+.arttoy-detail-dropdown h5 {
+    font-weight: 400;
+    font-size: 16px;
+    color: black;
+    word-wrap: break-word;
+    max-width: 300px;
+    margin: 0; /* ปรับ margin ให้เหมาะสม */
+    text-indent: 0; /* ทำให้ข้อความใน h5 ขึ้นบรรทัดใหม่อยู่ในแนวเดียวกับ h4 */
+}
+
+.bid_arttoy_image_container {
+    position: relative;
+    width: 100%;
+    max-width: 600px; /* Adjust as needed */
+    margin: auto;
+    object-fit: cover;
+}
+
+.image-slider img {
+    width: 100%;
+    height: auto;
+}
+
+.slider-controls {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+}
+
+.slider-controls button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.slider-controls button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
 }

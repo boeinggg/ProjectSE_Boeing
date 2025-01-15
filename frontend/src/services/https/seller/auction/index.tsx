@@ -16,7 +16,6 @@ const requestOptions = {
     },
 };
 
-
 async function GetArtToy() {
     return await axios
 
@@ -77,4 +76,15 @@ async function CreateAuction(data: AuctionInterface) {
         .catch((e) => e.response);
 }
 
-export { GetAuction, GetArtToy, GetAutionById, UpdateAuctionById, DeleteAuctionById, CreateAuction };
+async function UpdateAuctionStatus(id: string, status: string) {
+    return await axios
+        .put(
+            `${apiUrl}/auctions/${id}/status`, // ใช้ URL ที่ตรงกับ Gin Route
+            { status }, // ส่ง status ผ่าน request body
+            requestOptions // headers ที่ต้องการ
+        )
+        .then((res) => res)
+        .catch((e) => e.response);
+}
+
+export { GetAuction, GetArtToy, GetAutionById, UpdateAuctionById, DeleteAuctionById, CreateAuction, UpdateAuctionStatus };

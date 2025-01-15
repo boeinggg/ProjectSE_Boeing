@@ -3,7 +3,7 @@ import "../arttoy_detail.css";
 import Button from "../button";
 import Dropzone from "../dropzone";
 import { GetArtToyById, GetCategory, UpdateArtToysById } from "../../../../services/https/seller/arttoy";
-import { GetAutionById, UpdateAuctionById } from "../../../../services/https/seller/auction";
+import { GetAutionById, UpdateAuctionById, UpdateAuctionStatus } from "../../../../services/https/seller/auction";
 import { ArtToysInterface } from "../../../../interfaces/ArtToy";
 import { AuctionInterface } from "../../../../interfaces/Auction";
 import { Toaster, toast } from "react-hot-toast";
@@ -69,7 +69,12 @@ const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
                         Status: auctionData.Status,
                     });
 
-                    setUploadedFiles(artToyData.Picture ? artToyData.Picture.split(",") : []);
+                    setUploadedFiles(
+                        artToyData.Picture
+                            ? artToyData.Picture.split(",") // แยกค่าจากเครื่องหมายจุลภาค
+                                  .filter((part: string) => !part.startsWith("data:image/jpeg;base64")) // กรองค่าที่เริ่มต้นด้วย 'data:image/jpeg;base64,' เพื่อหลีกเลี่ยงการซ้ำ
+                            : []
+                    );
                 }
             } catch (error) {
                 console.error("Error fetching art toy or auction details:", error);
@@ -141,6 +146,24 @@ const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
             try {
                 await UpdateArtToysById(id, artToyValues);
                 await UpdateAuctionById(id, auctionValues);
+
+                // ตรวจสอบสถานะใหม่ตามวันที่
+                const now = new Date();
+                let newStatus = "";
+                if (formValues.StartDateTime > now) {
+                    newStatus = "Upcoming";
+                } else if (formValues.EndDateTime < now) {
+                    newStatus = "Closed";
+                } else {
+                    newStatus = "Active";
+                }
+
+                // เรียก service อัปเดตสถานะ
+                if (newStatus !== formValues.Status) {
+                    await UpdateAuctionStatus(id, newStatus);
+                    toast.success(`Status updated to ${newStatus}!`);
+                }
+
                 toast.success("Data updated successfully!");
             } catch (error) {
                 console.error("Error updating data:", error);
@@ -158,74 +181,24 @@ const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
             return;
         }
 
-        const resizeImage = async (file: string) => {
-            const img = new Image();
-            img.src = file;
+        setUploadedFiles(newFiles);
 
-            return new Promise<string>((resolve) => {
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    const ctx = canvas.getContext("2d");
-
-                    let width = img.width;
-                    let height = img.height;
-
-                    // ปรับขนาดภาพตามสัดส่วน
-                    const MAX_WIDTH = 300;
-                    const MAX_HEIGHT = 300;
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height = (height * MAX_WIDTH) / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width = (width * MAX_HEIGHT) / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    ctx?.drawImage(img, 0, 0, width, height);
-
-                    // ฟังก์ชันที่จะบีบอัดจนกว่าไฟล์จะมีขนาดไม่เกิน 10KB
-                    const compressImage = (canvas: HTMLCanvasElement): string => {
-                        let quality = 1; // เริ่มต้นที่คุณภาพสูงสุด
-                        let dataUrl = canvas.toDataURL("image/jpeg", quality);
-                        let size = (dataUrl.length * 3) / 4 / 1024; // คำนวณขนาดไฟล์ใน KB
-
-                        while (size > 10 && quality > 0.1) {
-                            quality -= 0.1; // ลดคุณภาพลง
-                            dataUrl = canvas.toDataURL("image/jpeg", quality);
-                            size = (dataUrl.length * 3) / 4 / 1024;
-                        }
-
-                        return dataUrl;
-                    };
-
-                    const compressedBase64 = compressImage(canvas);
-                    resolve(compressedBase64);
-                };
-            });
-        };
-
-        const processFiles = async () => {
-            const resizedFiles = await Promise.all(base64Files.map((file) => resizeImage(file)));
-            setUploadedFiles((prev) => [...prev, ...resizedFiles]);
-
-            if (newFiles.length === MAX_FILES) setIsDropzoneVisible(false);
-        };
-
-        processFiles();
+        if (newFiles.length === MAX_FILES) setIsDropzoneVisible(false);
     };
 
     const handleRemoveFile = (index: number) => {
         setUploadedFiles((prev) => {
             const updatedFiles = prev.filter((_, i) => i !== index);
+
+            // If there are less than MAX_FILES remaining, show the Dropzone
             if (updatedFiles.length < MAX_FILES) setIsDropzoneVisible(true);
-            return updatedFiles;
+
+            // Remove 'data:image/jpeg;base64,' from the image data if it's included
+            const cleanedFiles = updatedFiles.map((file) =>
+                file.startsWith("data:image/jpeg;base64,") ? file.split("data:image/jpeg;base64,")[1] : file
+            );
+
+            return cleanedFiles;
         });
     };
 
@@ -315,7 +288,16 @@ const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
                                 <div className="uploaded-files">
                                     {uploadedFiles.map((base64Image, index) => (
                                         <div key={index} className="uploaded-file">
-                                            <img src={base64Image} alt={`Uploaded ${index}`} className="uploaded-file-preview" />
+                                            <img
+                                                src={
+                                                    base64Image.startsWith("data:image/jpeg;base64,")
+                                                        ? base64Image
+                                                        : `data:image/jpeg;base64,${base64Image}`
+                                                }
+                                                alt={`Uploaded ${index}`} // Adjust for slice, since slice starts at index 1
+                                                className="uploaded-file-preview"
+                                            />
+
                                             <button className="remove-file-icon" onClick={() => handleRemoveFile(index)}>
                                                 &times;
                                             </button>

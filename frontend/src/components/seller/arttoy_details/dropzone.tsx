@@ -56,10 +56,10 @@ const Dropzone: React.FC<DropzoneProps> = ({ onDrop, maxFiles = 4 }) => {
                     ctx.drawImage(img, 0, 0, width, height);
 
                     // Convert canvas to base64 string with quality set
-                    const base64Data = canvas.toDataURL("image/jpeg", 0.7); // Set quality to 0.7 (can be adjusted)
+                    const base64Data = canvas.toDataURL("image/jpeg", 0.8); // Set quality to 0.7 (can be adjusted)
                     const compressedSize = (base64Data.length * 3) / 4; // Approximate size of Base64 string (in bytes)
                     console.log("Compressed base64 size:", compressedSize, "bytes");
-                    console.log(base64Data)
+                    console.log(base64Data);
 
                     resolve(base64Data);
                 }

@@ -9,7 +9,7 @@ import (
 	// "backend/middlewares"
 
 	"github.com/gin-gonic/gin"
-	"github.com/robfig/cron/v3"
+	// "github.com/robfig/cron/v3"
 )
 
 const PORT = "3036"
@@ -22,7 +22,7 @@ func main() {
 	// Generate databases
 	config.SetupDatabase()
 
-	StartBackgroundJob()
+	// StartBackgroundJob()
 
 	r := gin.Default()
 
@@ -59,6 +59,7 @@ func main() {
 		router.POST("/auctions", controller.CreateAuctionDetail)
 		router.PUT("/auctions/:id", controller.UpdateAuctionDetail)
 		router.DELETE("/auctions/:id", controller.DeleteAuctionDetail)
+		router.PUT("/auctions/:id/status", controller.UpdateAuctionStatus)
 		
 		}
 		
@@ -90,10 +91,10 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func StartBackgroundJob() {
-	c := cron.New()
-	c.AddFunc("@every 1m", func() {
-		controller.UpdateAllAuctionStatuses() // เรียกใช้ฟังก์ชันโดยไม่ต้องใช้ context
-	})
-	c.Start()
-}
+// func StartBackgroundJob() {
+// 	c := cron.New()
+// 	c.AddFunc("@every 1m", func() {
+// 		controller.UpdateAllAuctionStatuses() // เรียกใช้ฟังก์ชันโดยไม่ต้องใช้ context
+// 	})
+// 	c.Start()
+// }
