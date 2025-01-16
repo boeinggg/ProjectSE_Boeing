@@ -80,9 +80,9 @@
 }
 .list {
     padding: 10px 100px;
-    display: grid;
+    /* display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-gap: 10px;
+    grid-gap: 10px; */
 }
 
 .status {
@@ -92,16 +92,13 @@
     padding: 50px;
 }
 
-.status-item {
-    padding: 10px;
-    /* คุณสามารถกำหนดสไตล์เพิ่มเติมได้ตามต้องการ เช่น สีตัวอักษร, พื้นหลัง */
-}
 
 .status-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 10px;
+    cursor: pointer;
 
     /* ... สไตล์อื่นๆ */
 }
@@ -144,6 +141,30 @@
     height: 414px;
     margin-bottom: 20px;
     cursor: pointer;
+}
+
+.cards-group {
+    display: flex;
+    justify-content: space-around;
+    
+}
+
+
+.ant-carousel .slick-prev,
+.ant-carousel .slick-next {
+    /* font-size: 100px; */
+    width: 40px;
+    height: auto;
+    color: lawngreen; /* เปลี่ยนสี */
+    background-color: rgba(255, 255, 255, 0.6); /* เปลี่ยนสีพื้นหลัง */
+}
+
+.ant-carousel .slick-prev {
+    left: 0px;
+}
+
+.ant-carousel .slick-next {
+    right: 0px;
 }
 
 .card img {
@@ -288,44 +309,31 @@
     margin-bottom: 20px;
 }
 
-.arttoy-detail-dropdown {
+.arttoy-full-details {
     /* Light background color */
     padding: 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #989494;
+    /* cursor: pointer; */
+    /* border-bottom: 1px solid #989494; */
     padding-bottom: 30px;
-    overflow: hidden; /* ซ่อนเนื้อหาที่เกินออกมา */
-    transition: max-height 1s ease-out; /* เพิ่ม transition สำหรับการขยายความสูง */
-    max-height: 100px; /* เริ่มต้นด้วยความสูงเป็น 0 */
+    max-height: fit-content; /* เริ่มต้นด้วยความสูงเป็น 0 */
 }
-.arttoy-detail-dropdown[open] {
-    max-height: max-content; /* กำหนด max-height ที่ใหญ่พอสำหรับเนื้อหาทั้งหมด */
-}
-.arttoy-detail-dropdown summary {
+
+.arttoy-full-details h1 {
+    font-size: 18px;
     font-weight: 600;
-    font-size: 16px;
-    color: black;
-    text-align: left;
-    align-items: center;
-    margin-top: 20px;
+    margin-bottom: 5px;
 }
 
-.arttoy-detail-dropdown h4 {
-    font-weight: 400;
+.arttoy-full-details h4 {
     font-size: 16px;
-    color: #989494;
-    margin-top: 6px;
-    display: flex;
+    font-weight: 500;
+    color: #454444;
 }
 
-.arttoy-detail-dropdown h5 {
-    font-weight: 400;
+.arttoy-full-details h5 {
     font-size: 16px;
+    font-weight: 500;
     color: black;
-    word-wrap: break-word;
-    max-width: 300px;
-    margin: 0; /* ปรับ margin ให้เหมาะสม */
-    text-indent: 0; /* ทำให้ข้อความใน h5 ขึ้นบรรทัดใหม่อยู่ในแนวเดียวกับ h4 */
 }
 
 .bid_arttoy_image_container {
@@ -366,6 +374,8 @@
 
 .time_left_details {
     display: flex;
+    width: 100%;
+    justify-content: center;
     /* justify-content: space-between;
     align-items: center; */
     gap: 10px;
@@ -382,19 +392,18 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     margin: 0 5px;
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
 }
 
 .time-box h2 {
-    font-size: 24px;
+    font-size: 36px;
     font-weight: bold;
 }
 
 .time-box h3 {
-    font-size: 12px;
-
+    font-size: 18px;
     color: gray;
 }
 
@@ -434,4 +443,67 @@
 .bid_input:focus {
     border-color: #007bff; /* Change border color on focus */
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.2); /* Add soft shadow on focus */
+}
+
+.bid-container {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* เว้นระยะห่างระหว่าง Input และ Button */
+}
+
+.bid-input {
+    flex: 1; /* ทำให้ Input ยืดขยายได้ตามพื้นที่ */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.place-bid-btn {
+    padding: 8px 16px;
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.place-bid-btn:hover {
+    background-color: lime; /* เปลี่ยนสีเมื่อ hover */
+    color: white;
+}
+
+.bid-history {
+    margin-top: 20px;
+}
+
+.bid-history h1 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.bid-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bid-history th,
+.bid-history td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.bid-history th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.bid-history tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.bid-history tr:hover {
+    background-color: #f1f1f1;
 }

@@ -39,7 +39,7 @@ func CreateBid(c *gin.Context) {
 	var bidder entity.Bidder
 	db.First(&bidder, bid.BidderID)
 	if bidder.ID == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "seller not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "bidder not found"})
 		return
 	}
 
@@ -98,5 +98,38 @@ func ListBids(c *gin.Context) {
 		}
 		return
 	}
+	c.JSON(http.StatusOK, bids)
+}
+
+func GetBidHistoryByAuctionId(c *gin.Context) {
+	auctionID := c.Param("auctionId") // ดึง auctionId จาก URL พารามิเตอร์
+	var bids []entity.Bid
+
+	// เชื่อมต่อฐานข้อมูล
+	db := config.DB()
+
+	// ดึงข้อมูล Bid ที่เกี่ยวข้องกับ Auction ID
+	results := db.Preload("AuctionDetail").Preload("Bidder").
+		Where("auction_detail_id = ?", auctionID).
+		Order("created_at DESC"). // เรียงตามจำนวนเงิน bid
+		Find(&bids)
+
+	// ตรวจสอบว่าเกิด Error หรือไม่
+	if results.Error != nil {
+		if results.Error == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No bid history found for this auction"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": results.Error.Error()})
+		}
+		return
+	}
+
+	// ถ้าไม่มี Bid ใน Auction นี้
+	if len(bids) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No bids placed for this auction."}) // ส่งข้อความ JSON
+		return
+	}
+
+	// ส่งข้อมูล Bid History กลับในรูป JSON
 	c.JSON(http.StatusOK, bids)
 }

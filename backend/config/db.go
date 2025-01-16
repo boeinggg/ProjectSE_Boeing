@@ -50,6 +50,8 @@ func SetupDatabase() {
 		&entity.Bidder{},
 
 		&entity.Bid{},
+
+		&entity.Chat{},
 	)
 
 	Category2 := entity.Category{Name: "Blind Box"}

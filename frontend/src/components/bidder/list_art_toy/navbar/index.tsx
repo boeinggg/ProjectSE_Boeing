@@ -7,6 +7,7 @@ import { IoIosLogOut } from "react-icons/io";
 import "./listToy_navbar.css"; // เพิ่มไฟล์ CSS
 import icon from "../../../../assets/logo.gif";
 import { SearchOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const items: MenuProps["items"] = [
     {
@@ -31,13 +32,18 @@ const items: MenuProps["items"] = [
 
 const Navbar: React.FC = () => {
     const [searchText, setSearchText] = useState("");
+    const navigate = useNavigate();
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchText(e.target.value);
     };
+
+    const handleLogoClick = () => {
+        navigate("/"); // เปลี่ยนเส้นทางไปยังหน้าหลัก หรือระบุ path ที่ต้องการ
+    };
     return (
         <div className="custom_navbar_list_toy">
-            <div className="logo">
+            <div className="logo" onClick={handleLogoClick}>
                 <div className="logo-icon">
                     <img src={icon} alt="Logo" />
                 </div>

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react"; // Import useRef
 import "./list_art_toy.css";
+import { Carousel } from "antd";
+import { FaCircleChevronLeft, FaCircleChevronRight } from "react-icons/fa6";
 
 import Navbar from "../../../components/bidder/list_art_toy/navbar";
 import { GetArtToy, GetCategory } from "../../../services/https/seller/arttoy";
@@ -12,7 +14,7 @@ import { AuctionInterface } from "../../../interfaces/Auction";
 import { GetAuction } from "../../../services/https/seller/auction";
 import ActiveIcon from "../../../assets/up.png";
 import UpPrice from "../../../assets/up-arrow.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CategoryInterface {
     ID: number;
@@ -24,7 +26,13 @@ const ListArtToy: React.FC = () => {
     const [categories, setCategories] = useState<CategoryInterface[] | null>(null);
     const [artToys, setArtToys] = useState<ArtToysInterface[]>([]);
     const [auctions, setAUctions] = useState<AuctionInterface[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const navigate = useNavigate();
+    const { search } = useLocation(); // Get query parameters from URL
+
+    const upcomingRef = useRef<HTMLDivElement | null>(null);
+    const activeRef = useRef<HTMLDivElement | null>(null);
+    const closedRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -75,12 +83,46 @@ const ListArtToy: React.FC = () => {
         return () => clearInterval(intervalId); // Cleanup on component unmount
     }, []);
 
+    useEffect(() => {
+        const params = new URLSearchParams(search);
+        const category = params.get("category");
+        if (category) {
+            setSelectedCategory(category);
+        }
+    }, [search]);
+
     const handleTabClick = (category: CategoryInterface) => {
-        console.log("Clicked category:", category);
+        setSelectedCategory(category.Name);
     };
 
     const handleCardClick = (artToy: ArtToysInterface) => {
         navigate(`/bidder/bidArtToy/${artToy.ID}`);
+    };
+
+    const filteredArtToys = artToys.filter((artToy) => {
+        const auction = auctions.find((a) => a.ArtToyID === artToy.ID);
+
+        if (selectedCategory === "All") {
+            return true;
+        }
+
+        if (selectedCategory === "Active") {
+            return auction?.Status === "Active";
+        }
+
+        const category = categories?.find((cat) => cat.Name === selectedCategory);
+        return category ? artToy.CategoryID === category.ID : false;
+    });
+
+    const handleStatusClick = (status: string) => {
+        // Scroll to the corresponding section
+        if (status === "Upcoming" && upcomingRef.current) {
+            upcomingRef.current.scrollIntoView({ behavior: "smooth" });
+        } else if (status === "Active" && activeRef.current) {
+            activeRef.current.scrollIntoView({ behavior: "smooth" });
+        } else if (status === "Closed" && closedRef.current) {
+            closedRef.current.scrollIntoView({ behavior: "smooth" });
+        }
     };
 
     return (
@@ -95,7 +137,7 @@ const ListArtToy: React.FC = () => {
                                     <button
                                         key={category.ID}
                                         onClick={() => handleTabClick(category)}
-                                        className={`tab ${category.isActive ? "active" : ""}`}
+                                        className={`tab ${selectedCategory === category.Name ? "active" : ""}`}
                                     >
                                         {category.Name}
                                     </button>
@@ -108,19 +150,19 @@ const ListArtToy: React.FC = () => {
                         <img src={banner} alt="Banner" className="banner" />
                     </div>
                     <div className="status">
-                        <span className="status-item ">
+                        <span className="status-item" onClick={() => handleStatusClick("Upcoming")}>
                             <div className="status-icon-container status-item-upcoming">
                                 <img src={upcomming} alt="Upcoming" className="status-icon" />
                             </div>
                             Upcoming
                         </span>
-                        <span className="status-item">
+                        <span className="status-item" onClick={() => handleStatusClick("Active")}>
                             <div className="status-icon-container status-item-active">
                                 <img src={active} alt="Active" className="status-icon" />
                             </div>
                             Active
                         </span>
-                        <span className="status-item">
+                        <span className="status-item" onClick={() => handleStatusClick("Closed")}>
                             <div className="status-icon-container status-item-close">
                                 <img src={close} alt="Close" className="status-icon" />
                             </div>
@@ -129,61 +171,385 @@ const ListArtToy: React.FC = () => {
                     </div>
                     <h1>ART TOY</h1>
                     <div className="list">
-                        {artToys.map((artToy) => (
-                            <div className="card" key={artToy.ID} onClick={() => handleCardClick(artToy)}>
-                                <div>
-                                    {artToy.Picture && (
-                                        <img
-                                            src={(() => {
-                                                // เช็คว่ามีหลายรูปภาพไหม
-                                                const pictures = artToy.Picture.split(",data:image/jpeg;base64,");
+                        <Carousel
+                            arrows={true}
+                            prevArrow={<FaCircleChevronLeft />}
+                            nextArrow={<FaCircleChevronRight />}
+                            infinite={false}
+                            draggable={true}
+                            dots={false}
+                        >
+                            {filteredArtToys
+                                .sort((a, b) => {
+                                    const auctionA = auctions.find((auction) => auction.ArtToyID === a.ID);
+                                    const auctionB = auctions.find((auction) => auction.ArtToyID === b.ID);
 
-                                                // ถ้ามีมากกว่าหนึ่งรูป ให้แสดงรูปแรก
-                                                if (pictures.length > 1) {
-                                                    return `data:image/jpeg;base64,${pictures[0]}`;
-                                                }
+                                    // Define the status order for sorting
+                                    const statusOrder: { [key: string]: number } = {
+                                        Active: 1,
+                                        Upcoming: 2,
+                                        Closed: 3,
+                                    };
 
-                                                // ถ้ามีแค่รูปเดียวหรือไม่มีการแยก แสดงรูปนั้นหรือเติม prefix ถ้ายังไม่มี
-                                                return artToy.Picture.startsWith("data:image/jpeg;base64,")
-                                                    ? artToy.Picture // ถ้ามีแค่รูปเดียวที่เริ่มต้นด้วย "data:image/jpeg;base64,"
-                                                    : `data:image/jpeg;base64,${artToy.Picture}`; // ถ้าไม่มี "data:image/jpeg;base64," ให้เติมไป
-                                            })()}
-                                            alt={artToy.Name}
-                                        />
-                                    )}
-                                </div>
+                                    // Safely get status or default to "Closed" if undefined
+                                    const statusA = auctionA?.Status || "Closed"; // Default to "Closed" if status is undefined
+                                    const statusB = auctionB?.Status || "Closed"; // Default to "Closed" if status is undefined
 
-                                <h2>{artToy.Name}</h2>
-                                <h3>{artToy.Brand}</h3>
-                                <h4>
-                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "Active" && (
-                                        <img
-                                            src={ActiveIcon}
-                                            alt="Active Icon"
-                                            style={{ width: "16px", height: "16px", verticalAlign: "middle", marginRight: "5px" }}
-                                        />
-                                    )}
-                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
-                                </h4>
-                                <h5>Highest bid</h5>
-                                <h6>
-                                    ฿ {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.CurrentPrice?.toLocaleString() || "0"}
-                                    {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status === "Active" && (
-                                        <img
-                                            src={UpPrice}
-                                            alt="Active Icon"
-                                            className="active-icon"
-                                            style={{
-                                                width: "20px",
-                                                height: "auto",
-                                                verticalAlign: "middle",
-                                                marginLeft: "5px",
-                                            }}
-                                        />
-                                    )}
-                                </h6>
-                            </div>
-                        ))}
+                                    // Compare statuses based on the order in statusOrder
+                                    return (
+                                        (statusOrder[statusA] || statusOrder["Closed"]) - (statusOrder[statusB] || statusOrder["Closed"])
+                                    );
+                                })
+
+                                .reduce<ArtToysInterface[][]>((acc, artToy, index) => {
+                                    const groupIndex = Math.floor(index / 4); // Group 4 cards per slide
+                                    if (!acc[groupIndex]) acc[groupIndex] = []; // Create a new group if none exists
+                                    acc[groupIndex].push(artToy); // Add the card to the group
+                                    return acc;
+                                }, [])
+                                .map((group, index) => (
+                                    <div key={index} className="carousel-slide">
+                                        <div className="cards-group">
+                                            {group.map((artToy) => (
+                                                <div className="card" key={artToy.ID} onClick={() => handleCardClick(artToy)}>
+                                                    <div>
+                                                        {artToy.Picture && (
+                                                            <img
+                                                                src={(() => {
+                                                                    const pictures = artToy.Picture.split(",data:image/jpeg;base64,");
+                                                                    return pictures.length > 1
+                                                                        ? `data:image/jpeg;base64,${pictures[0]}`
+                                                                        : artToy.Picture.startsWith("data:image/jpeg;base64,")
+                                                                        ? artToy.Picture
+                                                                        : `data:image/jpeg;base64,${artToy.Picture}`;
+                                                                })()}
+                                                                alt={artToy.Name}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <h2>{artToy.Name}</h2>
+                                                    <h3>{artToy.Brand}</h3>
+                                                    <h4>
+                                                        {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                            "Active" && (
+                                                            <img
+                                                                src={ActiveIcon}
+                                                                alt="Active Icon"
+                                                                style={{
+                                                                    width: "16px",
+                                                                    height: "16px",
+                                                                    verticalAlign: "middle",
+                                                                    display: "inline-block",
+                                                                }}
+                                                            />
+                                                        )}
+                                                        {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                                                    </h4>
+                                                    <h5>Highest bid</h5>
+                                                    <h6>
+                                                        ฿{" "}
+                                                        {auctions
+                                                            .find((auction) => auction.ArtToyID === artToy.ID)
+                                                            ?.CurrentPrice?.toLocaleString() || "0"}
+                                                        {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                            "Active" && (
+                                                            <img
+                                                                src={UpPrice}
+                                                                alt="Active Icon"
+                                                                className="active-icon"
+                                                                style={{
+                                                                    width: "20px",
+                                                                    height: "auto",
+                                                                    verticalAlign: "middle",
+                                                                    marginLeft: "5px",
+                                                                    display: "inline-block",
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </h6>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                        </Carousel>
+                    </div>
+                    <div className="list">
+                        {/* Upcoming Auctions */}
+                        <Carousel
+                            arrows={true}
+                            prevArrow={<FaCircleChevronLeft />}
+                            nextArrow={<FaCircleChevronRight />}
+                            infinite={false}
+                            draggable={true}
+                            dots={false}
+                        >
+                            {filteredArtToys
+                                .filter((artToy) => {
+                                    const auction = auctions.find((auction) => auction.ArtToyID === artToy.ID);
+                                    return auction?.Status === "Upcoming";
+                                })
+                                .reduce<ArtToysInterface[][]>((acc, artToy, index) => {
+                                    const groupIndex = Math.floor(index / 4); // Group 4 cards per slide
+                                    if (!acc[groupIndex]) acc[groupIndex] = []; // Create a new group if none exists
+                                    acc[groupIndex].push(artToy); // Add the card to the group
+                                    return acc;
+                                }, [])
+                                .map((group, groupIndex) => (
+                                    <div key={groupIndex} ref={upcomingRef} className="carousel-slide">
+                                        <h2>Upcoming</h2>
+                                        {group.length === 0 ? (
+                                            <h2>No Art Toys Available</h2>
+                                        ) : (
+                                            <div className="cards-group">
+                                                {group.map((artToy) => (
+                                                    <div className="card" key={artToy.ID} onClick={() => handleCardClick(artToy)}>
+                                                        <div>
+                                                            {artToy.Picture && (
+                                                                <img
+                                                                    src={(() => {
+                                                                        const pictures = artToy.Picture.split(",data:image/jpeg;base64,");
+                                                                        return pictures.length > 1
+                                                                            ? `data:image/jpeg;base64,${pictures[0]}`
+                                                                            : artToy.Picture.startsWith("data:image/jpeg;base64,")
+                                                                            ? artToy.Picture
+                                                                            : `data:image/jpeg;base64,${artToy.Picture}`;
+                                                                    })()}
+                                                                    alt={artToy.Name}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <h2>{artToy.Name}</h2>
+                                                        <h3>{artToy.Brand}</h3>
+                                                        <h4>
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={ActiveIcon}
+                                                                    alt="Active Icon"
+                                                                    style={{
+                                                                        width: "16px",
+                                                                        height: "16px",
+                                                                        verticalAlign: "middle",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                                                        </h4>
+                                                        <h5>Highest bid</h5>
+                                                        <h6>
+                                                            ฿{" "}
+                                                            {auctions
+                                                                .find((auction) => auction.ArtToyID === artToy.ID)
+                                                                ?.CurrentPrice?.toLocaleString() || "0"}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={UpPrice}
+                                                                    alt="Active Icon"
+                                                                    className="active-icon"
+                                                                    style={{
+                                                                        width: "20px",
+                                                                        height: "auto",
+                                                                        verticalAlign: "middle",
+                                                                        marginLeft: "5px",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </h6>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </Carousel>
+
+                        {/* Active Auctions */}
+                        <Carousel
+                            arrows={true}
+                            prevArrow={<FaCircleChevronLeft />}
+                            nextArrow={<FaCircleChevronRight />}
+                            infinite={false}
+                            draggable={true}
+                            dots={false}
+                        >
+                            {filteredArtToys
+                                .filter((artToy) => {
+                                    const auction = auctions.find((auction) => auction.ArtToyID === artToy.ID);
+                                    return auction?.Status === "Active";
+                                })
+                                .reduce<ArtToysInterface[][]>((acc, artToy, index) => {
+                                    const groupIndex = Math.floor(index / 4); // Group 4 cards per slide
+                                    if (!acc[groupIndex]) acc[groupIndex] = []; // Create a new group if none exists
+                                    acc[groupIndex].push(artToy); // Add the card to the group
+                                    return acc;
+                                }, [])
+                                .map((group, groupIndex) => (
+                                    <div key={groupIndex} ref={activeRef} className="carousel-slide">
+                                        <h2>Active</h2>
+                                        {group.length === 0 ? (
+                                            <p>No Art Toys Available</p>
+                                        ) : (
+                                            <div className="cards-group">
+                                                {group.map((artToy) => (
+                                                    <div className="card" key={artToy.ID} onClick={() => handleCardClick(artToy)}>
+                                                        <div>
+                                                            {artToy.Picture && (
+                                                                <img
+                                                                    src={(() => {
+                                                                        const pictures = artToy.Picture.split(",data:image/jpeg;base64,");
+                                                                        return pictures.length > 1
+                                                                            ? `data:image/jpeg;base64,${pictures[0]}`
+                                                                            : artToy.Picture.startsWith("data:image/jpeg;base64,")
+                                                                            ? artToy.Picture
+                                                                            : `data:image/jpeg;base64,${artToy.Picture}`;
+                                                                    })()}
+                                                                    alt={artToy.Name}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <h2>{artToy.Name}</h2>
+                                                        <h3>{artToy.Brand}</h3>
+                                                        <h4>
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={ActiveIcon}
+                                                                    alt="Active Icon"
+                                                                    style={{
+                                                                        width: "16px",
+                                                                        height: "16px",
+                                                                        verticalAlign: "middle",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                                                        </h4>
+                                                        <h5>Highest bid</h5>
+                                                        <h6>
+                                                            ฿{" "}
+                                                            {auctions
+                                                                .find((auction) => auction.ArtToyID === artToy.ID)
+                                                                ?.CurrentPrice?.toLocaleString() || "0"}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={UpPrice}
+                                                                    alt="Active Icon"
+                                                                    className="active-icon"
+                                                                    style={{
+                                                                        width: "20px",
+                                                                        height: "auto",
+                                                                        verticalAlign: "middle",
+                                                                        marginLeft: "5px",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </h6>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </Carousel>
+
+                        {/* Closed Auctions */}
+                        <Carousel
+                            arrows={true}
+                            prevArrow={<FaCircleChevronLeft />}
+                            nextArrow={<FaCircleChevronRight />}
+                            infinite={false}
+                            draggable={true}
+                            dots={false}
+                        >
+                            {filteredArtToys
+                                .filter((artToy) => {
+                                    const auction = auctions.find((auction) => auction.ArtToyID === artToy.ID);
+                                    return auction?.Status === "Closed";
+                                })
+                                .reduce<ArtToysInterface[][]>((acc, artToy, index) => {
+                                    const groupIndex = Math.floor(index / 4); // Group 4 cards per slide
+                                    if (!acc[groupIndex]) acc[groupIndex] = []; // Create a new group if none exists
+                                    acc[groupIndex].push(artToy); // Add the card to the group
+                                    return acc;
+                                }, [])
+                                .map((group, groupIndex) => (
+                                    <div key={groupIndex} ref={closedRef} className="carousel-slide">
+                                        <h2>Closed</h2>
+                                        {group.length === 0 ? (
+                                            <p>No Art Toys Available</p>
+                                        ) : (
+                                            <div className="cards-group">
+                                                {group.map((artToy) => (
+                                                    <div className="card" key={artToy.ID} onClick={() => handleCardClick(artToy)}>
+                                                        <div>
+                                                            {artToy.Picture && (
+                                                                <img
+                                                                    src={(() => {
+                                                                        const pictures = artToy.Picture.split(",data:image/jpeg;base64,");
+                                                                        return pictures.length > 1
+                                                                            ? `data:image/jpeg;base64,${pictures[0]}`
+                                                                            : artToy.Picture.startsWith("data:image/jpeg;base64,")
+                                                                            ? artToy.Picture
+                                                                            : `data:image/jpeg;base64,${artToy.Picture}`;
+                                                                    })()}
+                                                                    alt={artToy.Name}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <h2>{artToy.Name}</h2>
+                                                        <h3>{artToy.Brand}</h3>
+                                                        <h4>
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={ActiveIcon}
+                                                                    alt="Active Icon"
+                                                                    style={{
+                                                                        width: "16px",
+                                                                        height: "16px",
+                                                                        verticalAlign: "middle",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status}
+                                                        </h4>
+                                                        <h5>Highest bid</h5>
+                                                        <h6>
+                                                            ฿{" "}
+                                                            {auctions
+                                                                .find((auction) => auction.ArtToyID === artToy.ID)
+                                                                ?.CurrentPrice?.toLocaleString() || "0"}
+                                                            {auctions.find((auction) => auction.ArtToyID === artToy.ID)?.Status ===
+                                                                "Active" && (
+                                                                <img
+                                                                    src={UpPrice}
+                                                                    alt="Active Icon"
+                                                                    className="active-icon"
+                                                                    style={{
+                                                                        width: "20px",
+                                                                        height: "auto",
+                                                                        verticalAlign: "middle",
+                                                                        marginLeft: "5px",
+                                                                        display: "inline-block",
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </h6>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </Carousel>
                     </div>
                 </div>
             </div>

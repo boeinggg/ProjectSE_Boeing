@@ -87,4 +87,20 @@ async function UpdateAuctionStatus(id: string, status: string) {
         .catch((e) => e.response);
 }
 
-export { GetAuction, GetArtToy, GetAutionById, UpdateAuctionById, DeleteAuctionById, CreateAuction, UpdateAuctionStatus };
+async function UpdateAuctionPrice(id: string, currentPrice: number) {
+    return await axios
+        .put(`${apiUrl}/auctions/${id}/price`, { currentPrice }, requestOptions)
+        .then((res) => res)
+        .catch((e) => e.response);
+}
+
+export {
+    GetAuction,
+    GetArtToy,
+    GetAutionById,
+    UpdateAuctionById,
+    DeleteAuctionById,
+    CreateAuction,
+    UpdateAuctionStatus,
+    UpdateAuctionPrice,
+};

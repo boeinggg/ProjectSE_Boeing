@@ -45,4 +45,11 @@ async function CreateBid(data: BidsInterface) {
         .catch((e) => e.response);
 }
 
-export { GetBid, GetBidById, CreateBid };
+async function GetBidHistoryByAuctionId(auctionId: string | number) {
+    return await axios
+        .get(`${apiUrl}/bids/history/${auctionId}`, requestOptions)
+        .then((res) => res)
+        .catch((e) => e.response);
+}
+
+export { GetBid, GetBidById, CreateBid, GetBidHistoryByAuctionId };

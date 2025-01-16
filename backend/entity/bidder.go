@@ -40,4 +40,6 @@ type Bidder struct {
 
 	// User *User `gorm:"foreignKey:user_id" json:"user"`
 	Bids []Bid `gorm:"foreignKey:BidderID"`
+
+	Chats       []Chat `gorm:"foreignKey:BidderID"` 
 }

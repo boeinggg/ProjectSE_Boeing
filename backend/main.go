@@ -43,8 +43,6 @@ func main() {
 		router.PUT("/arttoys/:id", controller.UpdateArtToy)
 		router.DELETE("/arttoys/:id", controller.DeleteArtToy)
 		router.GET("/arttoys/latest", controller.GetLatestArtToyID)
-		// router.GET("/members/count", controller.CountMembers)
-		// router.POST("/members/:id/subscribe", controller.CheckSubscription)
 
 		// Category Routes
 		router.GET("/categories", controller.ListCategories)
@@ -60,11 +58,15 @@ func main() {
 		router.PUT("/auctions/:id", controller.UpdateAuctionDetail)
 		router.DELETE("/auctions/:id", controller.DeleteAuctionDetail)
 		router.PUT("/auctions/:id/status", controller.UpdateAuctionStatus)
+		router.PUT("/auctions/:id/price", controller.UpdateAuctionPrice)
 
 		// Bid Routes
 		router.GET("/bids", controller.ListBids)
 		router.GET("/bid/:id", controller.GetBid)
 		router.POST("/bids", controller.CreateBid)
+		router.GET("/bids/history/:auctionId", controller.GetBidHistoryByAuctionId)
+
+		router.POST("/chats", controller.CreateChat)
 		}
 		
 	}

@@ -4,12 +4,11 @@ import Navbar from "../../../components/bidder/list_art_toy/navbar";
 import { GetCategory, GetArtToyById } from "../../../services/https/seller/arttoy";
 import { useParams } from "react-router-dom";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
-import { GetAutionById, UpdateAuctionStatus } from "../../../services/https/seller/auction";
+import { GetAutionById, UpdateAuctionPrice, UpdateAuctionStatus } from "../../../services/https/seller/auction";
 import { AuctionInterface } from "../../../interfaces/Auction";
-import { RiArrowDropDownLine } from "react-icons/ri";
-import { RiArrowDropUpLine } from "react-icons/ri";
-import { CreateBid } from "../../../services/https/bidder/bid";
+import { CreateBid, GetBidHistoryByAuctionId } from "../../../services/https/bidder/bid";
 import { BidsInterface } from "../../../interfaces/Bid";
+import { useNavigate } from "react-router-dom";
 
 interface CategoryInterface {
     ID: number;
@@ -22,10 +21,11 @@ const BidArtToy: React.FC = () => {
     const [artToy, setArtToy] = useState<ArtToysInterface | null>(null); // For storing Art Toy details
     const [auction, setAuction] = useState<AuctionInterface | null>(null);
     const [categoryName, setCategoryName] = useState<string | null>(null); // Store category name here
-    const [openDropdown, setOpenDropdown] = useState<{ [key: string]: boolean }>({}); // Track open/close state for each dropdown
     const [timeLeft, setTimeLeft] = useState<string>(""); // Countdown timer state
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [bidAmount, setBidAmount] = useState<number>(0); // Track the bid amount
+    const [bids, setBids] = useState<BidsInterface[]>([]);
+    const navigate = useNavigate(); // Initialize the navigate function
 
     const { id } = useParams<{ id: string }>();
     const handleBidAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +89,8 @@ const BidArtToy: React.FC = () => {
                 const seconds = Math.floor((difference / 1000) % 60);
                 setTimeLeft(`${days},${hours},${minutes},${seconds}`);
             } else {
-                setTimeLeft("Auction Ended");
+                setTimeLeft("0,0,0,0");
+
                 // Check if id is defined before calling UpdateAuctionStatus
                 if (id) {
                     UpdateAuctionStatus(id, "Closed");
@@ -102,12 +103,25 @@ const BidArtToy: React.FC = () => {
         return () => clearInterval(interval); // Cleanup interval
     }, [auction, id]); // Include id in the dependency array
 
-    // Toggle the open/close state of the dropdown
-    const toggleDropdown = (key: string) => {
-        setOpenDropdown((prevState) => ({
-            ...prevState,
-            [key]: !prevState[key],
-        }));
+
+    const fetchArtToyDetails = async () => {
+        if (!id) return;
+        try {
+            const response = await GetArtToyById(id);
+            setArtToy(response.data);
+        } catch (error) {
+            console.error("Error fetching Art Toy details:", error);
+        }
+    };
+
+    const fetchAuctionDetails = async () => {
+        if (!id) return;
+        try {
+            const response = await GetAutionById(id);
+            setAuction(response.data);
+        } catch (error) {
+            console.error("Error fetching Auction details:", error);
+        }
     };
 
     const handlePlaceBid = async () => {
@@ -119,7 +133,7 @@ const BidArtToy: React.FC = () => {
         const now = new Date().getTime();
 
         // Check if the bid is higher than the current price + increment
-        if (bidAmount <= currentPrice + increment) {
+        if (bidAmount < currentPrice + increment) {
             alert("Your bid must be higher than the current price plus the increment.");
             return;
         }
@@ -130,19 +144,34 @@ const BidArtToy: React.FC = () => {
             return;
         }
 
-        // If everything is valid, create the bid
         const bidData: BidsInterface = {
             BidAmount: bidAmount,
-            AuctionID: auction.ID,
-            BidderID: 1, // Replace with actual bidder ID (from user authentication or context)
+            AuctionDetailID: auction.ID,
+            BidderID: 1, // Replace with actual bidder ID
         };
 
         console.log("Bid Data:", bidData);
 
         try {
             const response = await CreateBid(bidData);
-            if (response.status === 200) {
+            if (response.status === 201) {
                 alert("Bid placed successfully!");
+
+                // Update the auction's current price
+                try {
+                    const updateResponse = await UpdateAuctionPrice(String(auction.ID), bidAmount);
+                    if (updateResponse.status === 200) {
+                        console.log("Auction current price updated successfully!");
+                    } else {
+                        console.warn("Failed to update auction price.");
+                    }
+                } catch (error) {
+                    console.error("An error occurred while updating the auction price:", error);
+                }
+
+                // Fetch updated data
+                await fetchArtToyDetails();
+                await fetchAuctionDetails();
             } else {
                 alert("Failed to place bid.");
             }
@@ -150,6 +179,25 @@ const BidArtToy: React.FC = () => {
             alert("An error occurred while placing your bid.");
             console.error(error);
         }
+    };
+
+    useEffect(() => {
+        const fetchBids = async () => {
+            if (!id) return; // Ensure auction is loaded
+            try {
+                const response = await GetBidHistoryByAuctionId(id); // Fetch the bid history for the auction
+                setBids(response.data); // Set the bids data
+            } catch (error) {
+                console.error("Error fetching bid history:", error);
+            }
+        };
+        fetchBids();
+    }, [auction, id]); // Re-run when auction details change
+
+    const handleCategoryClick = (category: CategoryInterface) => {
+        setCategoryName(category.Name); // Set the clicked category name
+        // Navigate to the home page and pass the selected category as a query parameter
+        navigate(`/?category=${category.Name}`);
     };
 
     return (
@@ -161,7 +209,11 @@ const BidArtToy: React.FC = () => {
                         <div className="tabs">
                             {categories &&
                                 categories.map((category) => (
-                                    <button key={category.ID} className={`tab ${category.isActive ? "active" : ""}`}>
+                                    <button
+                                        key={category.ID}
+                                        className="tab"// Add active class to the selected category
+                                        onClick={() => handleCategoryClick(category)} // Handle category click
+                                    >
                                         {category.Name}
                                     </button>
                                 ))}
@@ -222,7 +274,58 @@ const BidArtToy: React.FC = () => {
                                         />
                                     )}
                                 </div>
-                                <h1 style={{ fontSize: "24px", fontWeight: "600", marginTop: "20px" }}>Time Left</h1>
+
+                                <div className="arttoy-full-details">
+                                    {/* ArtToy Details */}
+                                    <div style={{ borderBottom: "1px solid #989494", paddingBottom: "10px" }}>
+                                        <h1>Art Toy Details</h1>
+                                        {[
+                                            { label: "Brand", value: artToy.Brand },
+                                            { label: "Category", value: categoryName },
+                                            { label: "Size", value: artToy.Size },
+                                            { label: "Material", value: artToy.Material },
+                                        ].map(({ label, value }) => (
+                                            <div
+                                                key={label}
+                                                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                                            >
+                                                <h4>{label}</h4>
+                                                <h5>{value}</h5>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Description */}
+                                    <div style={{ borderBottom: "1px solid #989494", paddingBottom: "10px" }}>
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                marginTop: "10px",
+                                            }}
+                                        >
+                                            <h1>Description</h1>
+                                        </div>
+                                        <h5 style={{ wordWrap: "break-word", maxWidth: "500px" }}>{artToy.Description}</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bid_arttoy_details">
+                                <h1>{artToy.Name}</h1>
+                                <h3>{artToy.Brand}</h3>
+                                <div className="price">
+                                    <div className="start_price">
+                                        <h4>Starting from</h4>
+                                        <h5>฿ {auction.StartPrice?.toLocaleString() || "0"}</h5>
+                                    </div>
+                                    <div className="high_bid">
+                                        <h4>Highest bid</h4>
+                                        <h5>฿ {auction.CurrentPrice?.toLocaleString() || "0"}</h5>
+                                    </div>
+                                </div>
+                                <h1 style={{ fontSize: "22px", fontWeight: "500", marginTop: "20px" }}>Time Left</h1>
                                 <div className="time_left_details">
                                     <div className="time-box">
                                         <h2>{timeLeft && timeLeft.split(",")[0]}</h2>
@@ -250,71 +353,44 @@ const BidArtToy: React.FC = () => {
                                     <h2>฿{auction.BidIncrement?.toLocaleString() || "0"}</h2>
                                 </div>
 
-                                <input
-                                    type="number"
-                                    value={bidAmount}
-                                    placeholder="Enter your bid"
-                                    className="bid_input"
-                                    onChange={handleBidAmountChange}
-                                />
-                                <button onClick={handlePlaceBid} className="place-bid-btn">
-                                    Place Bid
-                                </button>
-                            </div>
-
-                            <div className="bid_arttoy_details">
-                                <h1>{artToy.Name}</h1>
-                                <h3>{artToy.Brand}</h3>
-                                <div className="price">
-                                    <div className="start_price">
-                                        <h4>Starting from</h4>
-                                        <h5>฿ {auction.StartPrice?.toLocaleString() || "0"}</h5>
-                                    </div>
-                                    <div className="high_bid">
-                                        <h4>Highest bid</h4>
-                                        <h5>฿ {auction.CurrentPrice?.toLocaleString() || "0"}</h5>
-                                    </div>
+                                <div className="bid-container">
+                                    <input
+                                        type="number"
+                                        value={bidAmount}
+                                        placeholder="Enter your bid"
+                                        className="bid-input"
+                                        onChange={handleBidAmountChange}
+                                    />
+                                    <button onClick={handlePlaceBid} className="place-bid-btn">
+                                        COMMIT
+                                    </button>
                                 </div>
-                                <details
-                                    className="arttoy-detail-dropdown"
-                                    open={openDropdown["detail1"]} // Control dropdown state
-                                    onClick={() => toggleDropdown("detail1")}
-                                >
-                                    <summary style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <span>ArtToy detail</span>
-                                        {openDropdown["detail1"] ? (
-                                            <RiArrowDropUpLine style={{ width: "32px", height: "auto", color: "gray" }} />
-                                        ) : (
-                                            <RiArrowDropDownLine style={{ width: "32px", height: "auto", color: "gray" }} />
-                                        )}
-                                    </summary>
-                                    {[
-                                        { label: "Brand", value: artToy.Brand },
-                                        { label: "Category", value: categoryName },
-                                        { label: "Size", value: artToy.Size },
-                                        { label: "Material", value: artToy.Material },
-                                    ].map(({ label, value }) => (
-                                        <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                            <h4>{label}</h4>
-                                            <h5>{value}</h5>
+
+                                <div className="bid-history">
+                                    <h1>Bid History</h1>
+                                    {bids.length > 0 ? (
+                                        <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                                            <table style={{ width: "100%", tableLayout: "fixed" }}>
+                                                <thead style={{ position: "sticky", top: 0, backgroundColor: "white", zIndex: 1 }}>
+                                                    <tr>
+                                                        <th>Bidder</th>
+                                                        <th>Bid Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {bids.map((bid) => (
+                                                        <tr key={bid.ID}>
+                                                            <td>{bid.Bidder?.FirstName || "Unknown Bidder"}</td>
+                                                            <td>฿ {bid.BidAmount?.toLocaleString() || "0"}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    ))}
-                                </details>
-                                <details
-                                    className="arttoy-detail-dropdown"
-                                    open={openDropdown["detail2"]} // Control dropdown state
-                                    onClick={() => toggleDropdown("detail2")}
-                                >
-                                    <summary style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <span>Description</span>
-                                        {openDropdown["detail2"] ? (
-                                            <RiArrowDropUpLine style={{ width: "32px", height: "auto", color: "gray" }} />
-                                        ) : (
-                                            <RiArrowDropDownLine style={{ width: "32px", height: "auto", color: "gray" }} />
-                                        )}
-                                    </summary>
-                                    <h5 style={{ wordWrap: "break-word", maxWidth: "500px" }}>{artToy.Description}</h5>
-                                </details>
+                                    ) : (
+                                        <p>No bids placed yet.</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}

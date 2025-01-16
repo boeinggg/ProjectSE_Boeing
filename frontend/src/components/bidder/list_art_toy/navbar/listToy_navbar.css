@@ -30,6 +30,7 @@
     justify-items: left;
     color: #d9d9d9;
     padding: 12px;
+    cursor: pointer;
 }
 .logo-icon {
     display: flex;

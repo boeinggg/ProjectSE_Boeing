@@ -207,41 +207,40 @@ func UpdateAuctionStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Auction status updated successfully", "data": auction})
 }
 
-// func UpdateAllAuctionStatuses() {
-//     db := config.DB()
+// PATCH /auctions/:id/price
+func UpdateAuctionPrice(c *gin.Context) {
+	auctionId := c.Param("id") // Get the auction ID from the URL parameter
+	var auction entity.AuctionDetail
+	var updatedPrice struct {
+		CurrentPrice float64 `json:"currentPrice"` // Expecting a JSON body with CurrentPrice
+	}
 
-//     var auctions []entity.AuctionDetail
-//     if err := db.Find(&auctions).Error; err != nil {
-//         log.Printf("Failed to fetch auction details: %v\n", err)
-//         return
-//     }
+	// Bind the JSON payload to updatedPrice
+	if err := c.ShouldBindJSON(&updatedPrice); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data"})
+		return
+	}
 
-//     // สร้าง time zone สำหรับประเทศไทย (GMT+7)
-//     thailandTimeZone := time.FixedZone("Asia/Bangkok", 7*60*60)
+	db := config.DB()
 
-//     now := time.Now().In(thailandTimeZone) // ใช้เวลาตาม Time zone ของประเทศไทย
-//     for _, auction := range auctions {
+	// Find the auction record in the database
+	result := db.First(&auction, auctionId)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Auction not found"})
+		return
+	}
 
-//         // แปลง StartDateTime และ EndDateTime ให้อยู่ใน Time zone ไทย
-//         startDateTime := auction.StartDateTime.In(thailandTimeZone)
-//         endDateTime := auction.EndDateTime.In(thailandTimeZone)
+	// Update the CurrentPrice field
+	auction.CurrentPrice = updatedPrice.CurrentPrice
 
-//         // ตรวจสอบเงื่อนไขสถานะ
-//         if now.After(startDateTime) && now.Before(endDateTime) {
-//             auction.Status = "Active" // หากเวลาอยู่ระหว่าง Start และ End
-//         } else if now.After(endDateTime) {
-//             auction.Status = "Close" // หากเวลาผ่านไปหลังจาก End Time
-//         } else if now.Before(startDateTime) {
-//             auction.Status = "Upcoming" // หากเวลายังไม่ถึง Start Time
-//         }
+	// Save the updated auction record
+	if err := db.Save(&auction).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update auction price"})
+		return
+	}
 
-//         log.Printf("Auction ID: %d | Now: %s | Start: %s | End: %s | Status: %s", auction.ID, now, startDateTime, endDateTime, auction.Status)
-
-//         if err := db.Save(&auction).Error; err != nil {
-//             log.Printf("Failed to update auction status for ID %d: %v\n", auction.ID, err)
-//             continue
-//         }
-//     }
-
-//     log.Println("All auction statuses updated successfully")
-// }
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Auction price updated successfully",
+		"data":    auction,
+	})
+}

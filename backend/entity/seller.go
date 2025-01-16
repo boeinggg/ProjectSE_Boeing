@@ -27,4 +27,5 @@ type Seller struct {
 
 	ArtToy       []ArtToy `gorm:"foreignKey:SellerID"` 
 
+	Chats       []Chat `gorm:"foreignKey:SellerID"` 
 }
