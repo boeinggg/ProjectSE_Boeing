@@ -41,6 +41,13 @@ const Navbar: React.FC = () => {
     const handleLogoClick = () => {
         navigate("/"); // เปลี่ยนเส้นทางไปยังหน้าหลัก หรือระบุ path ที่ต้องการ
     };
+
+    const handleSearchSubmit = () => {
+        if (searchText.trim()) {
+            // Navigate to the SearchArtToy page with the searchText as a query parameter
+            navigate(`/bidder/searchArtToy?query=${encodeURIComponent(searchText)}`);
+        }
+    };
     return (
         <div className="custom_navbar_list_toy">
             <div className="logo" onClick={handleLogoClick}>
@@ -49,7 +56,13 @@ const Navbar: React.FC = () => {
                 </div>
             </div>
             <div className="search-bar">
-                <Input placeholder="Search" prefix={<SearchOutlined />} value={searchText} onChange={handleSearchChange} />
+                <Input
+                    placeholder="Search"
+                    prefix={<SearchOutlined />}
+                    value={searchText}
+                    onChange={handleSearchChange}
+                    onPressEnter={handleSearchSubmit} // Trigger search on Enter key
+                />
             </div>
             <div className="dropdown">
                 <Dropdown menu={{ items }}>

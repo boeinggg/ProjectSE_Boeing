@@ -67,3 +67,23 @@ func CreateChat(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Created success", "data": cat})
 }
+
+func GetChatsByAuctionId(c *gin.Context) {
+	var chats []entity.Chat
+	auctionDetailId := c.Param("id")
+
+	// Use Debug to log SQL queries
+	result := config.DB().Debug().
+		Preload("Seller").
+		Preload("Bidder").
+		Preload("AuctionDetail").
+		Where("auction_detail_id = ?", auctionDetailId).
+		Find(&chats)
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": chats})
+}

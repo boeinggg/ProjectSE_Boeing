@@ -67,6 +67,7 @@ func main() {
 		router.GET("/bids/history/:auctionId", controller.GetBidHistoryByAuctionId)
 
 		router.POST("/chats", controller.CreateChat)
+		router.GET("/chats/:id", controller.GetChatsByAuctionId)
 		}
 		
 	}

@@ -9,7 +9,8 @@ import { AuctionInterface } from "../../../interfaces/Auction";
 import { CreateBid, GetBidHistoryByAuctionId } from "../../../services/https/bidder/bid";
 import { BidsInterface } from "../../../interfaces/Bid";
 import { useNavigate } from "react-router-dom";
-
+import { FaComment } from "react-icons/fa";
+import ChatModal from "../../../components/chat";
 interface CategoryInterface {
     ID: number;
     Name: string;
@@ -26,6 +27,7 @@ const BidArtToy: React.FC = () => {
     const [bidAmount, setBidAmount] = useState<number>(0); // Track the bid amount
     const [bids, setBids] = useState<BidsInterface[]>([]);
     const navigate = useNavigate(); // Initialize the navigate function
+    const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
     const { id } = useParams<{ id: string }>();
     const handleBidAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +104,6 @@ const BidArtToy: React.FC = () => {
         const interval = setInterval(calculateTimeLeft, 1000);
         return () => clearInterval(interval); // Cleanup interval
     }, [auction, id]); // Include id in the dependency array
-
 
     const fetchArtToyDetails = async () => {
         if (!id) return;
@@ -200,6 +201,15 @@ const BidArtToy: React.FC = () => {
         navigate(`/?category=${category.Name}`);
     };
 
+    // Function to toggle the modal visibility
+    const toggleModal = (auctionId?: number) => {
+        setIsModalOpen(!isModalOpen);
+        // Store the auctionId in case you need to use it later
+        if (auctionId) {
+            console.log("Auction ID for ChatModal:", auctionId);
+        }
+    };
+
     return (
         <div className="big-screen-bid">
             <div style={{ width: "100%" }}>
@@ -211,7 +221,7 @@ const BidArtToy: React.FC = () => {
                                 categories.map((category) => (
                                     <button
                                         key={category.ID}
-                                        className="tab"// Add active class to the selected category
+                                        className="tab" // Add active class to the selected category
                                         onClick={() => handleCategoryClick(category)} // Handle category click
                                     >
                                         {category.Name}
@@ -396,6 +406,12 @@ const BidArtToy: React.FC = () => {
                     )}
                 </div>
             </div>
+            {/* Floating chat icon */}
+            <div className="floating-chat" onClick={() => toggleModal(auction?.ID)}>
+                <FaComment size={30} color="#454545" />
+            </div>
+            // ChatModal Component with auctionId
+            {isModalOpen && auction?.ID && <ChatModal onClose={toggleModal} auctionId={auction.ID} />}
         </div>
     );
 };

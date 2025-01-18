@@ -152,10 +152,10 @@ const EditArtToyDetail: React.FC<{ id: string }> = ({ id }) => {
                 let newStatus = "";
                 if (formValues.StartDateTime > now) {
                     newStatus = "Upcoming";
-                } else if (formValues.EndDateTime < now) {
-                    newStatus = "Closed";
-                } else {
+                } else if (formValues.StartDateTime <= now && formValues.EndDateTime >= now) {
                     newStatus = "Active";
+                } else {
+                    newStatus = "Closed";
                 }
 
                 // เรียก service อัปเดตสถานะ

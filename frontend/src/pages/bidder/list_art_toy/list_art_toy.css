@@ -85,13 +85,17 @@
     grid-gap: 10px; */
 }
 
+.search-list {
+    overflow-y: auto;
+    margin-top: 16vh;
+}
+
 .status {
     display: flex; /* ใช้ flexbox เพื่อจัดเรียงเป็นแนวนอน */
     justify-content: center; /* จัดกลาง */
     gap: 200px; /* เว้นระยะห่างระหว่างแต่ละสถานะ */
     padding: 50px;
 }
-
 
 .status-item {
     display: flex;
@@ -145,10 +149,9 @@
 
 .cards-group {
     display: flex;
-    justify-content: space-around;
-    
+    /* justify-content: space-around; */
+    gap: 40px;
 }
-
 
 .ant-carousel .slick-prev,
 .ant-carousel .slick-next {
@@ -506,4 +509,25 @@
 
 .bid-history tr:hover {
     background-color: #f1f1f1;
+}
+
+.floating-chat {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.41);
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 9999; /* Ensure it stays above other content */
+    transition: background-color 0.3s;
+    justify-items: center;
+    align-items: center;
+    width: 60px; /* Set width */
+    height: 60px; /* Set height to match the width */
+}
+
+.floating-chat:hover {
+    background-color: greenyellow; /* Darker color on hover */
 }

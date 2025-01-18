@@ -11,7 +11,7 @@ import active from "../../../assets/auction.png";
 import close from "../../../assets/box.png";
 import { ArtToysInterface } from "../../../interfaces/ArtToy";
 import { AuctionInterface } from "../../../interfaces/Auction";
-import { GetAuction } from "../../../services/https/seller/auction";
+import { GetAuction, UpdateAuctionStatus } from "../../../services/https/seller/auction";
 import ActiveIcon from "../../../assets/up.png";
 import UpPrice from "../../../assets/up-arrow.png";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,7 +25,7 @@ interface CategoryInterface {
 const ListArtToy: React.FC = () => {
     const [categories, setCategories] = useState<CategoryInterface[] | null>(null);
     const [artToys, setArtToys] = useState<ArtToysInterface[]>([]);
-    const [auctions, setAUctions] = useState<AuctionInterface[]>([]);
+    const [auctions, setAuctions] = useState<AuctionInterface[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const navigate = useNavigate();
     const { search } = useLocation(); // Get query parameters from URL
@@ -62,7 +62,7 @@ const ListArtToy: React.FC = () => {
             try {
                 const response = await GetAuction();
                 const data: AuctionInterface[] = await response.data;
-                setAUctions(data);
+                setAuctions(data);
             } catch (error) {
                 console.error("Error fetching auctions:", error);
             }
@@ -90,6 +90,46 @@ const ListArtToy: React.FC = () => {
             setSelectedCategory(category);
         }
     }, [search]);
+
+    useEffect(() => {
+        const updateAuctionStatus = () => {
+            const now = new Date();
+
+            setAuctions((prevAuctions) =>
+                prevAuctions.map((auction) => {
+                    const startTime = auction.StartDateTime ? new Date(auction.StartDateTime) : null;
+                    const endTime = auction.EndDateTime ? new Date(auction.EndDateTime) : null;
+
+                    let status: string = auction.Status || "Unknown";
+
+                    if (startTime && now < startTime) {
+                        status = "Upcoming";
+                    } else if (startTime && endTime && now >= startTime && now <= endTime) {
+                        status = "Active";
+                    } else if (endTime && now > endTime) {
+                        status = "Closed";
+                    }
+
+                    // Call the API to update the status in the database
+                    if (status !== auction.Status && auction.ID !== undefined) {
+                        // Ensure auction.ID is defined and cast to string if necessary
+                        UpdateAuctionStatus(String(auction.ID), status); // Convert to string
+                    }
+
+                    return { ...auction, Status: status };
+                })
+            );
+        };
+
+        // Initial update immediately
+        updateAuctionStatus();
+
+        // Set interval to update status every second
+        const intervalId = setInterval(updateAuctionStatus, 1000);
+
+        // Cleanup on component unmount
+        return () => clearInterval(intervalId);
+    }, [auctions]); // Re-run whenever auctions change
 
     const handleTabClick = (category: CategoryInterface) => {
         setSelectedCategory(category.Name);
@@ -164,9 +204,9 @@ const ListArtToy: React.FC = () => {
                         </span>
                         <span className="status-item" onClick={() => handleStatusClick("Closed")}>
                             <div className="status-icon-container status-item-close">
-                                <img src={close} alt="Close" className="status-icon" />
+                                <img src={close} alt="Closed" className="status-icon" />
                             </div>
-                            Close
+                            Closed
                         </span>
                     </div>
                     <h1>ART TOY</h1>

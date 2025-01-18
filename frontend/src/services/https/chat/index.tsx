@@ -15,8 +15,6 @@ const requestOptions = {
     },
 };
 
-
-
 async function CreateChat(data: ChatsInterface) {
     return await axios
 
@@ -26,7 +24,11 @@ async function CreateChat(data: ChatsInterface) {
 
         .catch((e) => e.response);
 }
+async function GetChatsByAuctionId(auctionDetailId: string | number) {
+    return await axios
+        .get(`${apiUrl}/chats/${auctionDetailId}`, requestOptions)
+        .then((res) => res)
+        .catch((e) => e.response);
+}
 
-
-
-export {CreateChat };
+export { CreateChat, GetChatsByAuctionId };

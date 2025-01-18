@@ -314,19 +314,6 @@ const ArtToyDetail: React.FC = () => {
                                 error={errors.EndDate}
                             />
                         </div>
-                        {/* <SelectField
-                            label="Status"
-                            id="status"
-                            options={[
-                                { value: "", label: "Choose status" },
-                                { value: "upcoming", label: "Upcoming" },
-                                { value: "active", label: "Active" },
-                                { value: "close", label: "Close" },
-                            ]}
-                            value={formValues.status}
-                            onChange={handleInputChange}
-                            error={errors.status}
-                        /> */}
                     </div>
                 </div>
             </div>
